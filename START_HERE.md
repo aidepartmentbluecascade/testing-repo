@@ -2,6 +2,10 @@
 
 A personal learning portal built from **Understand your CV: A foundations-first learning workbook**. It follows your original 38-lesson order, from basic definitions through applications and engineering trade-offs.
 
+## Day 2 — Backend Engineering & Databases
+
+A dedicated [Day 2 interview preparation guide](docs/interview-preparation/day-2/README.md) covers eight modules: Python/Node.js/TypeScript, APIs, PostgreSQL, Redis, security, system architecture, queues, and mock interview exercises. It uses concise **Term: Definition** explanations with examples, backend use cases, and interview scenarios.
+
 ## Updating from the previous portal
 
 Read **UPDATE_GUIDE.md** first. Export a backup from the old portal before moving or replacing files, then import it through **Setup & backups** in this edition. Old-format backups are supported. Browser storage may differ between filenames, folders, browsers and server addresses.
