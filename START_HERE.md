@@ -2,9 +2,13 @@
 
 A personal learning portal built from **Understand your CV: A foundations-first learning workbook**. It follows your original 38-lesson order, from basic definitions through applications and engineering trade-offs.
 
-## Day 2 — Backend Engineering & Databases
+## Interactive 3-Day Associate Backend Engineer Bootcamp
 
-A dedicated [Day 2 interview preparation guide](docs/interview-preparation/day-2/README.md) covers eight modules: Python/Node.js/TypeScript, APIs, PostgreSQL, Redis, security, system architecture, queues, and mock interview exercises. It uses concise **Term: Definition** explanations with examples, backend use cases, and interview scenarios.
+The homepage provides direct access to three separate interactive learning dashboards. Each includes eight modules, concise **Term: Definition** explanations, examples, backend use cases, 24 interview questions, answer feedback, topic skipping, notes, and browser-local progress.
+
+- **[Day 1 — AI, LLMs, RAG & Agents](/day1):** AI/ML, LLM fundamentals, prompting, RAG, evaluation, agents, orchestration and guardrails.
+- **[Day 2 — Backend Engineering & Databases](/day2):** Python, Node.js, APIs, PostgreSQL, Redis, security, architecture and queues. [Detailed reference guide](docs/interview-preparation/day-2/README.md).
+- **[Day 3 — MLOps, Cloud, Voice AI & Mock Interview](/day3):** ML frameworks, deployment, CI/CD, voice AI, frontend, integrations, system design and mock interviews.
 
 ## Updating from the previous portal
 
