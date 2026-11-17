@@ -273,6 +273,8 @@ class PortalHandler(BaseHTTPRequestHandler):
                                  "model": self.server.service.model or None, "csrfToken": self.server.csrf_token})
         elif path in {"/", "/index.html"}:
             body = (ROOT / "index.html").read_bytes()
+            day2_link = ('<script>(function(){const add=()=>{const nav=document.querySelector("#sidebar nav");if(!nav||document.getElementById("day2PortalLink"))return;const a=document.createElement("a");a.id="day2PortalLink";a.href="/day2";a.className="navbtn";a.style.textDecoration="none";a.textContent="📘 Day 2 · Backend & Databases";nav.appendChild(a)};new MutationObserver(add).observe(document.getElementById("sidebar"),{childList:true,subtree:true});add()})();</script>').encode("utf-8")
+            body = body.replace(b"</body>", day2_link + b"</body>")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -280,6 +282,17 @@ class PortalHandler(BaseHTTPRequestHandler):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+            self.end_headers()
+            self.wfile.write(body)
+        elif path in {"/day2", "/day2.html"}:
+            body = (ROOT / "day2.html").read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(body)
         elif path == "/favicon.ico":
