@@ -1,0 +1,1932 @@
+{
+  "title": "TableOS — System Design Study Hub",
+  "source": {
+    "title": "TableOS System Design — as built",
+    "version": "0.36.0",
+    "date": "19 November 2026",
+    "pages": 9,
+    "notice": "Based on the uploaded 9-page PDF. Deployed-system facts are attributed to the document's 19 Nov 2026 snapshot. Teaching examples are illustrations, not independently verified system behavior."
+  },
+  "modules": [
+    {
+      "title": "1. What TableOS Is",
+      "page": 3,
+      "overview": "Understand the product and its hierarchy before diving into infrastructure. This section describes the source's deployed v0.36.0 snapshot, not a promise about later releases.",
+      "terms": [
+        {
+          "term": "TableOS",
+          "definition": "A team-oriented, Airtable-style relational database platform.",
+          "example": "A sales team manages Leads and Deals in tables.",
+          "use": "Lets teams configure data and processes without changing backend schemas."
+        },
+        {
+          "term": "Organization",
+          "definition": "Top-level tenant containing members and workspaces.",
+          "example": "Blue Cascade is the tenant; teams work inside it.",
+          "use": "Defines membership and account-level security."
+        },
+        {
+          "term": "Workspace",
+          "definition": "Container grouping related bases inside an organization.",
+          "example": "Sales workspace has CRM and Reporting bases.",
+          "use": "Organizes access and collaboration."
+        },
+        {
+          "term": "Base",
+          "definition": "A database-like project containing tables, views and automations.",
+          "example": "CRM base contains Leads and Deals.",
+          "use": "Unit of data changes and realtime subscriptions."
+        },
+        {
+          "term": "Table",
+          "definition": "Collection of records with fields.",
+          "example": "Leads table.",
+          "use": "Stores one category of structured business data."
+        },
+        {
+          "term": "Record",
+          "definition": "A row containing field values.",
+          "example": "Lead record for a company.",
+          "use": "CRUD target in the REST API."
+        },
+        {
+          "term": "Field",
+          "definition": "Typed column describing a record attribute.",
+          "example": "Email or Deal Value.",
+          "use": "Validation, filtering, formatting and compute."
+        },
+        {
+          "term": "View",
+          "definition": "Saved presentation/query of a table.",
+          "example": "Kanban grouped by status or calendar by date.",
+          "use": "Different UIs over the same underlying records."
+        },
+        {
+          "term": "Interface",
+          "definition": "A page-based app assembled over data from a base.",
+          "example": "Manager's pipeline dashboard.",
+          "use": "Task-specific frontend without exposing the raw grid."
+        },
+        {
+          "term": "Automation",
+          "definition": "A trigger followed by actions.",
+          "example": "When a new lead is created, send a message.",
+          "use": "Event-based workflow execution."
+        },
+        {
+          "term": "Synced table",
+          "definition": "A table populated by another data source.",
+          "example": "HubSpot contacts copied into a TableOS table.",
+          "use": "Connect external CRM or another base."
+        },
+        {
+          "term": "Public API",
+          "definition": "Token-authenticated REST access to platform resources.",
+          "example": "Integration script creates a record.",
+          "use": "Third-party automation."
+        }
+      ],
+      "flow": [
+        "Organization contains workspaces.",
+        "Workspace contains one or more bases.",
+        "Base contains tables; tables contain fields and records.",
+        "Views present those records in grid, gallery, kanban, calendar, timeline, list, Gantt or form.",
+        "Automations, interfaces, comments, syncs, attachments and sharing operate around that data."
+      ],
+      "example": "Learning example: A support organization creates a Support workspace → Tickets base → Tickets table → Status and Priority fields → Kanban view. This illustrates the documented hierarchy; the PDF does not assert that this specific base exists.",
+      "questions": [
+        {
+          "prompt": "What is the correct TableOS hierarchy?",
+          "options": [
+            "Organization → Workspace → Base → Table → Record",
+            "Record → Base → Organization → Workspace",
+            "Workspace → Organization → Field → Base",
+            "Organization → Table → Workspace → Record"
+          ],
+          "answer": 0,
+          "why": "An organization groups workspaces; workspaces group bases; bases contain tables and records.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Which feature changes how records appear without creating another table?",
+          "options": [
+            "View",
+            "API token",
+            "Migration",
+            "Relay"
+          ],
+          "answer": 0,
+          "why": "Views display the same table in different layouts and with saved filtering/grouping.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "An application needs to create records from an external script. Which interface is intended?",
+          "options": [
+            "Only a screenshot",
+            "Public REST API with access token",
+            "Browser CSS",
+            "Grafana dashboard"
+          ],
+          "answer": 1,
+          "why": "The document explicitly lists a public REST API accessed with tokens.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: TableOS is a data platform with a hierarchy plus workflows and integrations—not just a spreadsheet."
+    },
+    {
+      "title": "2. Deployment Topology",
+      "page": 3,
+      "overview": "Trace each service in the deployed architecture. The source specifies Render Singapore for compute/database/cache and Google Cloud Storage for objects.",
+      "terms": [
+        {
+          "term": "API service",
+          "definition": "The Fastify-backed service handling HTTP requests and several schedulers.",
+          "example": "PATCH updates a record.",
+          "use": "Validation, sessions, permissions and writes."
+        },
+        {
+          "term": "Realtime service",
+          "definition": "WebSocket gateway transmitting changes and presence.",
+          "example": "A colleague sees a cell update.",
+          "use": "Low-latency collaboration."
+        },
+        {
+          "term": "Worker service",
+          "definition": "Background process consuming BullMQ jobs and domain events.",
+          "example": "Index a changed record.",
+          "use": "Long-running and asynchronous tasks."
+        },
+        {
+          "term": "Relay service",
+          "definition": "Process polling database outbox rows and publishing events.",
+          "example": "Publish a committed record-change event.",
+          "use": "Reliable event handoff."
+        },
+        {
+          "term": "PostgreSQL",
+          "definition": "Relational system storing core, data and audit tables.",
+          "example": "Store records and revisions.",
+          "use": "Durable source of truth."
+        },
+        {
+          "term": "Valkey / Redis-compatible store",
+          "definition": "In-memory datastore used for queues, event bus, locks and realtime fan-out.",
+          "example": "Publish a base change to subscribers.",
+          "use": "Low-latency communication and job coordination."
+        },
+        {
+          "term": "Google Cloud Storage (GCS)",
+          "definition": "Object storage for private attachments and thumbnails.",
+          "example": "Store an uploaded PDF.",
+          "use": "Large binary objects outside PostgreSQL."
+        },
+        {
+          "term": "Static web app",
+          "definition": "Built React application delivered as static assets.",
+          "example": "Interactive grid in the browser.",
+          "use": "Logged-in frontend."
+        },
+        {
+          "term": "Public app",
+          "definition": "Separate app serving shared views, forms and interfaces.",
+          "example": "Anyone with a valid share link submits a form.",
+          "use": "Limited no-account experiences."
+        },
+        {
+          "term": "Grafana Cloud",
+          "definition": "Observability platform for dashboards and monitoring.",
+          "example": "Track p95 request latency.",
+          "use": "Operations and troubleshooting."
+        },
+        {
+          "term": "Migration",
+          "definition": "Versioned database schema change.",
+          "example": "Create a new metadata table.",
+          "use": "Keep deployed schema compatible with app code."
+        }
+      ],
+      "flow": [
+        "Browser uses HTTPS to communicate with the API and WSS to the realtime gateway.",
+        "API validates permissions and writes to Postgres.",
+        "Worker processes queued and event-triggered work, with Redis/Valkey assisting coordination.",
+        "Relay moves committed outbox events to the event bus.",
+        "Attachments live in private GCS; authorized clients access short-lived links.",
+        "Grafana and structured logs provide operational visibility."
+      ],
+      "example": "As built (19 Nov 2026): API web service 2 CPU/4 GB; realtime 1 CPU/2 GB; worker 1 CPU/2 GB; relay 0.5 CPU/512 MB. A single Postgres 18 database and Valkey 8 instance are shared; the original sharded/Kafka-style target design is not deployed.",
+      "questions": [
+        {
+          "prompt": "Which component polls outbox_events and publishes to the Redis event bus?",
+          "options": [
+            "Web app",
+            "Relay",
+            "Public app",
+            "GCS"
+          ],
+          "answer": 1,
+          "why": "The relay bridges committed PostgreSQL outbox records to the Redis event bus.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why store attachments in GCS instead of in the relational records table?",
+          "options": [
+            "To make every file public",
+            "To separate large binary objects from structured data",
+            "Because Postgres cannot store JSON",
+            "To eliminate access checks"
+          ],
+          "answer": 1,
+          "why": "Object storage handles large files; PostgreSQL stores the structured metadata.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Does the deployed design already use the original sharded data plane and Kafka-style log?",
+          "options": [
+            "Yes, both are live",
+            "No; the document says those belong to the target design",
+            "Only on mobile",
+            "Only for HubSpot"
+          ],
+          "answer": 1,
+          "why": "The PDF explicitly distinguishes as-built single Postgres/Redis deployment from original target architecture.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: API, realtime, worker and relay are separate runtime responsibilities around a single Postgres and Redis-compatible store."
+    },
+    {
+      "title": "3. Code Structure and Libraries",
+      "page": 4,
+      "overview": "Follow the TypeScript monorepo. The same server codebase has separate entrypoints; shared packages provide reusable domain logic.",
+      "terms": [
+        {
+          "term": "Monorepo",
+          "definition": "Repository containing multiple apps and shared packages.",
+          "example": "apps/server and apps/web in one repo.",
+          "use": "Coordinate types and contracts."
+        },
+        {
+          "term": "pnpm",
+          "definition": "JavaScript package manager supporting monorepo workspaces.",
+          "example": "Install workspace dependencies.",
+          "use": "Dependency management."
+        },
+        {
+          "term": "Turborepo",
+          "definition": "Build orchestration tool for monorepos.",
+          "example": "Run changed package builds.",
+          "use": "Efficient CI and builds."
+        },
+        {
+          "term": "Entrypoint",
+          "definition": "Program start target for a given runtime role.",
+          "example": "api, realtime, worker, relay.",
+          "use": "Run distinct services from one codebase."
+        },
+        {
+          "term": "Fastify 5",
+          "definition": "Node.js HTTP framework used by server code.",
+          "example": "Register REST routes.",
+          "use": "API request handling."
+        },
+        {
+          "term": "Kysely",
+          "definition": "Type-safe TypeScript SQL query builder.",
+          "example": "Build parameterized queries.",
+          "use": "Database access."
+        },
+        {
+          "term": "pg",
+          "definition": "PostgreSQL client for Node.js.",
+          "example": "Execute Kysely-generated SQL.",
+          "use": "Database connections."
+        },
+        {
+          "term": "BullMQ",
+          "definition": "Redis-backed Node.js job queue library.",
+          "example": "Process email queue.",
+          "use": "Background jobs."
+        },
+        {
+          "term": "ioredis",
+          "definition": "Redis/Valkey client for Node.js.",
+          "example": "Subscribe to a change channel.",
+          "use": "Realtime and queues."
+        },
+        {
+          "term": "Zod",
+          "definition": "Runtime schema parsing and validation library.",
+          "example": "Validate record update body.",
+          "use": "Reject malformed input."
+        },
+        {
+          "term": "React / Vite",
+          "definition": "Frontend component library and build tool.",
+          "example": "Build records grid.",
+          "use": "Interactive web app."
+        },
+        {
+          "term": "TanStack Query",
+          "definition": "Client-side management for server state.",
+          "example": "Cache table query results.",
+          "use": "Fetch and reconcile API data."
+        },
+        {
+          "term": "Zustand",
+          "definition": "Small client state store.",
+          "example": "Track presence display.",
+          "use": "Local UI state."
+        }
+      ],
+      "flow": [
+        "apps/server contains API, realtime, worker and relay code; scheduler is listed as a stub entrypoint.",
+        "apps/web builds authenticated React SPA; apps/public builds no-account shared-view and form app.",
+        "packages/fields defines codecs and validation; formula and compute packages handle calculated values.",
+        "packages/db supplies migrations and typed SQL; packages/auth and permissions enforce access.",
+        "packages/events/jobs/realtime-protocol/connectors share contracts across services."
+      ],
+      "example": "Learning example: A new Currency field involves a codec in packages/fields, a cell editor in packages/field-ui, query handling in packages/query, and API validation in apps/server. This example follows the documented boundaries; it is not an asserted change log entry.",
+      "questions": [
+        {
+          "prompt": "Where does the PDF locate shared field-type codecs?",
+          "options": [
+            "apps/public",
+            "packages/fields",
+            "Grafana",
+            "Render dashboard"
+          ],
+          "answer": 1,
+          "why": "The source names packages/fields for 31 field types, codecs and validation.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "What advantage comes from separate api and worker entrypoints in one codebase?",
+          "options": [
+            "All jobs must share one process",
+            "Shared domain code with independently deployed runtime roles",
+            "No need for TypeScript",
+            "No network errors"
+          ],
+          "answer": 1,
+          "why": "One codebase can reuse contracts while runtime roles are started separately.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Why must API input still be validated with Zod even if TypeScript types exist?",
+          "options": [
+            "Types run on untrusted JSON automatically",
+            "TypeScript types do not enforce runtime input shapes",
+            "Because Kysely is not SQL",
+            "Because React changes tokens"
+          ],
+          "answer": 1,
+          "why": "Types disappear at runtime; parsing/validation protects API boundaries.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: different apps and services share types, but each running process has a separate responsibility."
+    },
+    {
+      "title": "4. Data Model and Record Storage",
+      "page": 5,
+      "overview": "Understand the three PostgreSQL schemas and why adding fields does not require new SQL columns.",
+      "terms": [
+        {
+          "term": "core schema",
+          "definition": "PostgreSQL namespace for identity, tenancy, access and integrations.",
+          "example": "core.users and core.access_grants.",
+          "use": "Membership and access control."
+        },
+        {
+          "term": "data schema",
+          "definition": "Namespace for bases, tables, records, history, syncs and automations.",
+          "example": "data.records and data.fields.",
+          "use": "Business data."
+        },
+        {
+          "term": "audit schema",
+          "definition": "Namespace for security-relevant activity events.",
+          "example": "audit.audit_events.",
+          "use": "Trace security actions."
+        },
+        {
+          "term": "JSONB",
+          "definition": "PostgreSQL binary JSON representation with query operators.",
+          "example": "records.cells stores field values.",
+          "use": "Dynamic row schema."
+        },
+        {
+          "term": "Stable field slot",
+          "definition": "Internal immutable key identifying a field's stored value.",
+          "example": "cells keyed by slot, not display label.",
+          "use": "Rename fields without changing data keys."
+        },
+        {
+          "term": "Computed values",
+          "definition": "Derived values stored separately from user-edited cells.",
+          "example": "records.computed formula result.",
+          "use": "Fast reads of formulas/rollups."
+        },
+        {
+          "term": "record_links",
+          "definition": "Table storing relationships between records.",
+          "example": "Deal linked to Company.",
+          "use": "Relational links."
+        },
+        {
+          "term": "Typed sidecar index",
+          "definition": "Auxiliary rows indexing typed values from flexible JSONB records.",
+          "example": "record_index_num or record_index_time.",
+          "use": "Efficient filtering and sorting."
+        },
+        {
+          "term": "DDL",
+          "definition": "Database definition changes such as ALTER TABLE.",
+          "example": "Adding an SQL column.",
+          "use": "Avoided for normal user field edits."
+        },
+        {
+          "term": "Prefixed public ID",
+          "definition": "Identifier with a type-specific prefix.",
+          "example": "org_, bas_, tbl_, fld_, tos_.",
+          "use": "Distinguish resource types."
+        },
+        {
+          "term": "Change sequence",
+          "definition": "Per-base ordered counter for data changes.",
+          "example": "base_runtime.change_seq.",
+          "use": "Realtime ordering and replay."
+        },
+        {
+          "term": "Revision",
+          "definition": "Saved snapshot/change record for history.",
+          "example": "record_revisions.",
+          "use": "Activity, undo and audit context."
+        }
+      ],
+      "flow": [
+        "Metadata about table fields is saved in data.fields.",
+        "Editable cell values are keyed by stable slots in data.records.cells JSONB.",
+        "Computed formula/lookup/rollup results are persisted in data.records.computed.",
+        "Linked-record relationships live in data.record_links.",
+        "Large tables can use numeric/text/time sidecars for indexed sorts and filters.",
+        "Adding/deleting a user field changes metadata rather than altering database table columns."
+      ],
+      "example": "Illustrative storage: {cells:{'slot_a':'Ali','slot_b':1200},computed:{'slot_total':2400}}. Slots are invented for teaching, not real TableOS slot IDs. The source records 79 PostgreSQL tables across core, data and audit.",
+      "questions": [
+        {
+          "prompt": "Where do ordinary record values reside?",
+          "options": [
+            "data.records.cells JSONB keyed by stable slots",
+            "One SQL column per user field",
+            "Only Redis",
+            "A CSV file"
+          ],
+          "answer": 0,
+          "why": "The source explicitly places editable values under stable slot keys in JSONB.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why can a user add a field without a SQL ALTER TABLE?",
+          "options": [
+            "No data is persisted",
+            "Field metadata and JSONB slots represent dynamic fields",
+            "Migrations are forbidden",
+            "Everything is in GCS"
+          ],
+          "answer": 1,
+          "why": "Dynamic field definitions avoid modifying the physical schema for every user column.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "How are numeric/date filters accelerated on large flexible tables?",
+          "options": [
+            "Only full JSON scans",
+            "Typed sidecar indexes",
+            "Only browser sorting",
+            "By turning off filters"
+          ],
+          "answer": 1,
+          "why": "The source describes record_index_num/text/time sidecars.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: meta schema is stable; flexible user-defined fields live in JSONB and sidecar indexes."
+    },
+    {
+      "title": "5. A Change, End to End",
+      "page": 5,
+      "overview": "Follow the core system-design interview story: one authenticated record update becomes a durable transaction, a realtime frame and downstream event.",
+      "terms": [
+        {
+          "term": "Authentication hook",
+          "definition": "Request middleware verifying a session or API token.",
+          "example": "Validate PATCH request.",
+          "use": "Identify caller."
+        },
+        {
+          "term": "Permission snapshot",
+          "definition": "Compiled effective actions for a user and base.",
+          "example": "compileForUser.",
+          "use": "Fast consistent permission checks."
+        },
+        {
+          "term": "assertCan",
+          "definition": "Permission check for a specific action.",
+          "example": "assertCan(snapshot,'record.update').",
+          "use": "Authorization boundary."
+        },
+        {
+          "term": "withBaseTx",
+          "definition": "TableOS transaction wrapper around one base mutation.",
+          "example": "Update a cell and its revision.",
+          "use": "Atomic writes and event records."
+        },
+        {
+          "term": "change_seq",
+          "definition": "Monotonic per-base sequence of changes.",
+          "example": "104 then 105.",
+          "use": "Order realtime mutations."
+        },
+        {
+          "term": "Transactional outbox",
+          "definition": "Event rows written in the same DB transaction as business changes.",
+          "example": "data.outbox_events.",
+          "use": "Avoid losing events after commits."
+        },
+        {
+          "term": "base_changes",
+          "definition": "Persisted per-base change frames.",
+          "example": "data.base_changes.",
+          "use": "Realtime replay."
+        },
+        {
+          "term": "After-commit callback",
+          "definition": "Logic executed only once transaction succeeds.",
+          "example": "Publish frame to Redis.",
+          "use": "Avoid notifying for rolled-back changes."
+        },
+        {
+          "term": "FOR UPDATE SKIP LOCKED",
+          "definition": "SQL locking option letting concurrent workers claim distinct rows.",
+          "example": "Relay batch claims.",
+          "use": "Avoid double claiming."
+        },
+        {
+          "term": "Domain event",
+          "definition": "Fact indicating a meaningful change.",
+          "example": "RecordUpdated.",
+          "use": "Trigger search indexing/notifications."
+        },
+        {
+          "term": "Optimistic UI",
+          "definition": "Browser displays an edit before server confirmation.",
+          "example": "Cell changes immediately.",
+          "use": "Responsive collaboration."
+        }
+      ],
+      "flow": [
+        "1. Browser sends PATCH/POST with session cookie or bearer token.",
+        "2. Auth hook applies MFA/device conditions; compileForUser computes access; assertCan checks action and field rules.",
+        "3. withBaseTx increments change_seq, writes cells and revisions, runs dependent compute and queues sync pushes.",
+        "4. In the SAME transaction, append data.base_changes and data.outbox_events.",
+        "5. Commit succeeds. Only then publish realtime frame to a base Redis channel; other tabs patch caches.",
+        "6. Relay reads outbox with locking and publishes domain events; workers update search, send notifications and trigger syncs/automations."
+      ],
+      "example": "Learning trace: A user edits Ticket Status from Open to Resolved. The database update, revision, sequence increment and outbox event either all commit together or all roll back. The UI publishes the new status only after commit. Exact schema identifiers and example field names are illustrative.",
+      "questions": [
+        {
+          "prompt": "What must be in the same transaction as a record update?",
+          "options": [
+            "Only browser animations",
+            "Revision, base change and outbox event",
+            "External email delivery",
+            "Frontend cache"
+          ],
+          "answer": 1,
+          "why": "The source's one-transaction design atomically stores mutation, revision, base_changes and outbox.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why publish realtime updates only after COMMIT?",
+          "options": [
+            "To make Redis persistent",
+            "To avoid announcing a change that might roll back",
+            "To bypass authorization",
+            "To simplify CSS"
+          ],
+          "answer": 1,
+          "why": "Clients should not observe a change that was not durably committed.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "What failure does the transactional outbox help prevent?",
+          "options": [
+            "Invalid CSS",
+            "Committed DB change with no downstream event publication",
+            "Browser tab closure",
+            "Missing JWT issuer"
+          ],
+          "answer": 1,
+          "why": "Persist the event with the business change; relay can publish later.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember this 6-step explanation; it is the most important TableOS system-design interview flow."
+    },
+    {
+      "title": "6. Realtime and Presence",
+      "page": 6,
+      "overview": "Understand collaboration, synchronization after gaps and why WebSocket tickets are separate from normal API sessions.",
+      "terms": [
+        {
+          "term": "WebSocket",
+          "definition": "Persistent bidirectional browser-server connection.",
+          "example": "Realtime cell updates.",
+          "use": "Collaboration."
+        },
+        {
+          "term": "WS ticket",
+          "definition": "Short-lived proof allowing an authenticated client to connect.",
+          "example": "POST /v1/auth/ws-ticket.",
+          "use": "Secure realtime handshake."
+        },
+        {
+          "term": "Subprotocol",
+          "definition": "Named application protocol on top of WebSocket.",
+          "example": "tableos.v1.",
+          "use": "Compatible frame negotiation."
+        },
+        {
+          "term": "Base subscription",
+          "definition": "Gateway subscription to events for one base.",
+          "example": "Subscribe to bas_x.",
+          "use": "Scope changes to viewers."
+        },
+        {
+          "term": "Presence heartbeat",
+          "definition": "Periodic signal describing active user location.",
+          "example": "Selected cell and view.",
+          "use": "Show collaborators."
+        },
+        {
+          "term": "Sequence replay",
+          "definition": "Resend ordered changes after a client's last known number.",
+          "example": "Replay changes 203-208.",
+          "use": "Recover missed frames."
+        },
+        {
+          "term": "resync_required",
+          "definition": "Signal asking a client to refetch when a gap cannot be replayed.",
+          "example": "Reconnect after long outage.",
+          "use": "Restore consistency."
+        },
+        {
+          "term": "Mutation ID",
+          "definition": "Client identifier for a particular optimistic edit.",
+          "example": "Client ignores matching echo.",
+          "use": "Prevent duplicate local patch."
+        },
+        {
+          "term": "Access signal",
+          "definition": "Immediate authorization change broadcast.",
+          "example": "Removed user loses base access.",
+          "use": "Revocation."
+        },
+        {
+          "term": "Redis pub/sub fan-out",
+          "definition": "Distribution of base changes across realtime gateways.",
+          "example": "One gateway forwards to connected users.",
+          "use": "Scale realtime subscribers."
+        }
+      ],
+      "flow": [
+        "1. Authenticated client requests a short-lived WebSocket ticket.",
+        "2. Browser connects using tableos.v1 and subscribes to a base, optionally supplying last sequence.",
+        "3. Gateway delivers change frames and presence lists, with Redis subscription per base.",
+        "4. Collaborators see avatars and selected cells; clients send presence heartbeats.",
+        "5. If a sequence gap is recoverable, replay; otherwise emit resync_required.",
+        "6. Removed access is signaled immediately so connected tabs disconnect from the base."
+      ],
+      "example": "Learning scenario: Editor A updates a cell while Editor B is viewing it. B receives a frame and patches the cached row without requesting the entire grid. A ignores the matching own-mutation frame. This follows the documented browser behavior.",
+      "questions": [
+        {
+          "prompt": "What does a realtime client request before opening the TableOS WebSocket?",
+          "options": [
+            "A public API key pasted in UI",
+            "A short-lived WS ticket",
+            "A new database migration",
+            "An S3 upload"
+          ],
+          "answer": 1,
+          "why": "The source states POST /v1/auth/ws-ticket precedes connection.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "What should a client do when the server sends resync_required?",
+          "options": [
+            "Ignore it",
+            "Refetch authoritative state",
+            "Delete its own record",
+            "Disable presence"
+          ],
+          "answer": 1,
+          "why": "It signals a gap that cannot be safely replayed.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Why does a browser ignore a frame with its own client mutation ID?",
+          "options": [
+            "To disable access checks",
+            "To avoid reapplying an optimistic local edit",
+            "To skip audit logging",
+            "To preserve offline files"
+          ],
+          "answer": 1,
+          "why": "The sender has already applied its optimistic change and can suppress duplicate presentation.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: WebSocket sends changes, sequence numbers preserve order, presence is ephemeral, and DB remains source of truth."
+    },
+    {
+      "title": "7. Background Work and Event Bus",
+      "page": 6,
+      "overview": "Separate queued jobs, domain events, relay and scheduled jobs—four concepts interviewers often mix up.",
+      "terms": [
+        {
+          "term": "BullMQ queue",
+          "definition": "Named Redis-backed work list consumed by workers.",
+          "example": "file-process queue.",
+          "use": "Durable background execution."
+        },
+        {
+          "term": "Queue producer",
+          "definition": "Code adding jobs for later execution.",
+          "example": "API enqueues export.",
+          "use": "Decouple request latency."
+        },
+        {
+          "term": "Queue consumer",
+          "definition": "Worker processing a job.",
+          "example": "Build an export file.",
+          "use": "Async work."
+        },
+        {
+          "term": "Domain event consumer",
+          "definition": "Subscriber handling committed platform facts.",
+          "example": "Search indexer handles change.",
+          "use": "Event-driven side effects."
+        },
+        {
+          "term": "Outbox relay",
+          "definition": "Worker claiming unpublished DB events and forwarding to bus.",
+          "example": "Read batches of 50.",
+          "use": "Reliable asynchronous publication."
+        },
+        {
+          "term": "Poll interval",
+          "definition": "Time between relay checks.",
+          "example": "About 0.5 seconds in source.",
+          "use": "Event propagation latency."
+        },
+        {
+          "term": "Scheduled task",
+          "definition": "Task initiated at configured times.",
+          "example": "Trash purge.",
+          "use": "Periodic maintenance."
+        },
+        {
+          "term": "Database lock",
+          "definition": "Mutual exclusion coordination across worker processes.",
+          "example": "One sync run at a time.",
+          "use": "Prevent duplicated work."
+        },
+        {
+          "term": "Search indexer",
+          "definition": "Worker maintaining searchable text.",
+          "example": "Update search_documents.",
+          "use": "Full-text search."
+        },
+        {
+          "term": "Automation engine",
+          "definition": "Runner for triggers, schedules and steps.",
+          "example": "On record update, send email.",
+          "use": "Workflow orchestration."
+        }
+      ],
+      "flow": [
+        "API transaction writes outbox_events; it does not synchronously execute every downstream effect.",
+        "Relay polls roughly every 0.5 s and claims batches of 50 using database row locks.",
+        "Redis event bus delivers events to consumers such as search-indexer, collaboration notifications and table-sync.",
+        "BullMQ worker processes compute, automation-trigger/step, webhook-out, email, notification, search-index, file-scan/process, import/export, AI, sync, snapshot, purge and maintenance queues.",
+        "API schedulers also run sync sweeps, HubSpot push/mapping, retention, trash purge and time formulas.",
+        "Database locks protect scheduled syncs from simultaneous API/worker execution."
+      ],
+      "example": "Learning example: An uploaded CSV creates an import job. The HTTP request can return quickly, a worker imports rows later, and events trigger search indexing. The exact queue and table names follow the source; the example sequence is illustrative.",
+      "questions": [
+        {
+          "prompt": "Which library backs TableOS background queues?",
+          "options": [
+            "BullMQ on Redis",
+            "Only browser localStorage",
+            "React Router",
+            "Sharp"
+          ],
+          "answer": 0,
+          "why": "The source lists BullMQ on Redis/Valkey for many job types.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why use FOR UPDATE SKIP LOCKED when claiming outbox events?",
+          "options": [
+            "Allow several relays to claim distinct rows",
+            "Delete all events",
+            "Make SQL read-only",
+            "Generate signed URLs"
+          ],
+          "answer": 0,
+          "why": "Skip locked rows prevents concurrent claimers waiting on already claimed rows.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Two schedulers try to sync the same source. What mechanism is documented?",
+          "options": [
+            "CSS selector",
+            "Database lock",
+            "Higher LLM temperature",
+            "Gallery view"
+          ],
+          "answer": 1,
+          "why": "A DB lock guards scheduler runs to avoid concurrent duplicate sync operations.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: jobs are work requests; events describe things that happened; schedulers start work by time."
+    },
+    {
+      "title": "8. Fields, Formulas and Compute",
+      "page": 7,
+      "overview": "Learn the field engine: typed validation, dependency tracking, calculated values and sensitive-data policies.",
+      "terms": [
+        {
+          "term": "Field type",
+          "definition": "Kind of value and available operations.",
+          "example": "Currency, Date, Attachment.",
+          "use": "Validate and render cells."
+        },
+        {
+          "term": "Codec",
+          "definition": "Rules for parsing, serializing and converting a type.",
+          "example": "Parse number text.",
+          "use": "Reliable field transformations."
+        },
+        {
+          "term": "Formula",
+          "definition": "Expression computed from record data.",
+          "example": "Quantity * Price.",
+          "use": "Derived values."
+        },
+        {
+          "term": "Formula parser",
+          "definition": "Converts formula text into a structured typed representation.",
+          "example": "Parse A+B.",
+          "use": "Safe evaluation."
+        },
+        {
+          "term": "Typed tree",
+          "definition": "Tree of expression nodes annotated with types.",
+          "example": "Add(Number,Number).",
+          "use": "Validation and execution."
+        },
+        {
+          "term": "Lookup",
+          "definition": "Read a field through a linked record.",
+          "example": "Company name for a deal.",
+          "use": "Cross-table computed values."
+        },
+        {
+          "term": "Rollup",
+          "definition": "Aggregate linked records.",
+          "example": "Sum linked invoice values.",
+          "use": "Calculated summaries."
+        },
+        {
+          "term": "Count field",
+          "definition": "Computed number of related records.",
+          "example": "Number of tickets for a customer.",
+          "use": "Relationship summary."
+        },
+        {
+          "term": "Dependency graph",
+          "definition": "Map of fields that depend on other fields.",
+          "example": "Total depends on Quantity and Price.",
+          "use": "Incremental recalculation."
+        },
+        {
+          "term": "Incremental compute",
+          "definition": "Recalculate only affected derived values.",
+          "example": "Edit Quantity; recompute Total.",
+          "use": "Performance."
+        },
+        {
+          "term": "NOW()/TODAY()",
+          "definition": "Time-dependent formula functions refreshed by a scheduler.",
+          "example": "Days until due date.",
+          "use": "Time-aware values."
+        },
+        {
+          "term": "Sensitive field masking",
+          "definition": "Hiding protected values unless reveal policy permits access.",
+          "example": "Masked phone number.",
+          "use": "Privacy and audit."
+        },
+        {
+          "term": "Reveal list",
+          "definition": "Allowed people who may reveal selected sensitive fields.",
+          "example": "Authorized support lead.",
+          "use": "Controlled unmasking."
+        }
+      ],
+      "flow": [
+        "User creates a typed field; field package supplies codec, validation, filtering, sorting and conversions.",
+        "When a formula is saved, parser/evaluator identifies dependencies.",
+        "A changed input cell causes server runCompute to refresh affected formulas, lookups, rollups or counts.",
+        "Time-dependent expressions refresh on schedule because time can change without edits.",
+        "Email, Phone and Sensitive-marked fields are masked unless an authorized user reveals one cell with a logged reason."
+      ],
+      "example": "Learning example: Line Item has Quantity 3, Unit Price 20; formula Total = Quantity * Unit Price yields 60. Change Quantity to 4; dependency graph triggers recompute to 80. Expression is illustrative; incremental computation is documented.",
+      "questions": [
+        {
+          "prompt": "What enables efficient recomputation after one input field changes?",
+          "options": [
+            "Field dependencies",
+            "Delete every record",
+            "Public share links",
+            "WebSocket ticket"
+          ],
+          "answer": 0,
+          "why": "A dependency graph tells the system which calculated values depend on the input.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "What makes NOW() and TODAY() different from ordinary formulas?",
+          "options": [
+            "They depend on time, so a scheduler refreshes them",
+            "They cannot be saved",
+            "They are API tokens",
+            "They are SQL migrations"
+          ],
+          "answer": 0,
+          "why": "These formulas change without record edits.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "How does the PDF describe revealing sensitive cells?",
+          "options": [
+            "Always visible to all editors",
+            "Allowlisted people reveal cells individually with logged reason",
+            "Only browser CSS masks them",
+            "Every external API bypasses audit"
+          ],
+          "answer": 1,
+          "why": "Field-level controls require explicit reveal permissions and log the action.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: a field is not just a column label; it has a codec, permissions, filter semantics and compute rules."
+    },
+    {
+      "title": "9. Query Engine and Grid Rendering",
+      "page": 7,
+      "overview": "Follow how a browser view becomes a database query and why the grid avoids fetching the full table.",
+      "terms": [
+        {
+          "term": "Query compiler",
+          "definition": "Logic translating view filters/sorts/search into SQL.",
+          "example": "POST …/records/query.",
+          "use": "Safe consistent data access."
+        },
+        {
+          "term": "Cursor pagination",
+          "definition": "Paging with a position marker rather than large offsets.",
+          "example": "Fetch after cursor X.",
+          "use": "Scalable scrolling."
+        },
+        {
+          "term": "Projection",
+          "definition": "Selecting only required columns/fields.",
+          "example": "Show Name and Status only.",
+          "use": "Reduce payload."
+        },
+        {
+          "term": "Virtualized grid",
+          "definition": "UI rendering only the visible subset of data.",
+          "example": "Render rows as user scrolls.",
+          "use": "Handle large tables."
+        },
+        {
+          "term": "Typed sidecar",
+          "definition": "Index-friendly typed representation of JSON values.",
+          "example": "Number/date index rows.",
+          "use": "Efficient filtering."
+        },
+        {
+          "term": "Incremental patch",
+          "definition": "Update cached result from an incoming frame.",
+          "example": "Patch one changed row.",
+          "use": "Avoid expensive refetches."
+        },
+        {
+          "term": "Grouped view",
+          "definition": "Display that groups records by a field.",
+          "example": "Kanban by Status.",
+          "use": "Different presentations."
+        },
+        {
+          "term": "Attachment preview",
+          "definition": "Lightweight metadata sent for attachment cells.",
+          "example": "First files and '+N'.",
+          "use": "Avoid large responses."
+        },
+        {
+          "term": "Full-text search",
+          "definition": "Text indexing/querying across supported fields.",
+          "example": "Search visible names.",
+          "use": "Locate records."
+        }
+      ],
+      "flow": [
+        "Browser requests a table/view with filters, sorts, groupings and needed field IDs.",
+        "POST …/records/query compiles this into SQL over JSONB cells, typed sidecars and computed values.",
+        "Server returns cursor-paged records with only fields the grid needs.",
+        "Initial grid loads up to 1,200 rows, then requests more as user scrolls.",
+        "Attachment cells include initial files and count; long text shows 300-character preview.",
+        "Realtime frames patch existing rows; grid searches only fields visible in that view."
+      ],
+      "example": "Learning example: Sales Kanban filters Status = Open and orders by Due Date; query compiler pushes conditions into SQL with sidecar support. Grid shows loaded cards, not every DB record at once. Specific SQL syntax is illustrative.",
+      "questions": [
+        {
+          "prompt": "What operation does the grid use to query records?",
+          "options": [
+            "POST …/records/query",
+            "Only Redis GET",
+            "GCS upload",
+            "TOTP verification"
+          ],
+          "answer": 0,
+          "why": "The documented API compiles filters, sorts and search into SQL.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why request only visible/needed fields?",
+          "options": [
+            "To prevent user access entirely",
+            "Reduce response size and rendering cost",
+            "To disable computed columns",
+            "To force DDL"
+          ],
+          "answer": 1,
+          "why": "Field projection reduces payload for wide tables.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "What prevents full refetch after every collaborator edit?",
+          "options": [
+            "Browser patches cached rows using realtime frames",
+            "Reload entire application",
+            "Delete grid state",
+            "Longer signed links"
+          ],
+          "answer": 0,
+          "why": "The source describes realtime cache patching, not full refetch on every edit.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: SQL handles filtering, cursor pages bound work, and realtime patches keep the grid current."
+    },
+    {
+      "title": "10. Attachment Storage and Signed Links",
+      "page": 7,
+      "overview": "Understand the private-bucket lifecycle from upload to authorized browser access.",
+      "terms": [
+        {
+          "term": "Attachment",
+          "definition": "File associated with a TableOS record.",
+          "example": "Customer agreement PDF.",
+          "use": "Record-linked content."
+        },
+        {
+          "term": "Object storage",
+          "definition": "Service for storing binary objects with object keys.",
+          "example": "Private GCS bucket.",
+          "use": "Files outside SQL."
+        },
+        {
+          "term": "Object key",
+          "definition": "Path-like name locating an object.",
+          "example": "attachments/<workspace>/<base>/…",
+          "use": "Organized storage."
+        },
+        {
+          "term": "Private bucket",
+          "definition": "Storage whose objects are not public by default.",
+          "example": "Access prevention on bucket.",
+          "use": "File confidentiality."
+        },
+        {
+          "term": "Signed URL",
+          "definition": "Time-limited cryptographically authorized object request.",
+          "example": "V4 signed file link.",
+          "use": "Temporary download access."
+        },
+        {
+          "term": "V4 signature",
+          "definition": "Google Cloud Storage signature proving allowed URL parameters.",
+          "example": "Authenticated download redirect.",
+          "use": "Prevent unauthorized path/expiry changes."
+        },
+        {
+          "term": "Thumbnail",
+          "definition": "Smaller preview derived from an attachment.",
+          "example": "Image preview generated by sharp.",
+          "use": "Fast grid rendering."
+        },
+        {
+          "term": "sharp",
+          "definition": "Node.js image processing library.",
+          "example": "Generate previews.",
+          "use": "Thumbnail pipeline."
+        },
+        {
+          "term": "Server-side copy",
+          "definition": "Storage provider copies objects without browser re-upload.",
+          "example": "Legacy bucket migration.",
+          "use": "Efficient data transfer."
+        }
+      ],
+      "flow": [
+        "Client uploads through TableOS API; the system stores the object in private GCS.",
+        "The object key includes workspace/base/attachment/filename organization.",
+        "The API verifies the caller's access before redirecting to a signed V4 link.",
+        "The source says thumbnail links are valid around 1 hour and full file links 10 minutes, bounded by an at-most 2-hour issuance window.",
+        "GCS refuses changing signed object or extending signed expiry.",
+        "Sharp generates thumbnails; records reference attachments and variants."
+      ],
+      "example": "Source note: On 19 Nov 2026, the former shared bucket's 319,341 objects were copied server-side; call recordings referenced from records remained in the older ai-calls/ path. These are historical operations in the PDF, not instructions for current migration.",
+      "questions": [
+        {
+          "prompt": "Are TableOS attachment files publicly readable without checks?",
+          "options": [
+            "Yes, all are public",
+            "No, access is checked before a short signed URL",
+            "Only through Slack",
+            "Only if in JSONB"
+          ],
+          "answer": 1,
+          "why": "Objects are private; the API checks access and provides temporary signed links.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why are signed URLs short-lived?",
+          "options": [
+            "So files become unencrypted",
+            "To limit reuse after an authorized access decision",
+            "Because URLs cannot contain filenames",
+            "To make uploads slower"
+          ],
+          "answer": 1,
+          "why": "The expiry limits the duration of delegated access.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Can an attacker alter the object key inside an existing signed URL and keep it valid?",
+          "options": [
+            "Yes, signatures don't cover objects",
+            "No, the provider validates the signature against the signed request",
+            "Only for thumbnails",
+            "Only after refresh"
+          ],
+          "answer": 1,
+          "why": "Changing protected URL parameters invalidates its signature.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: authorization at the API and cryptographic time-limited storage access are two separate controls."
+    },
+    {
+      "title": "11. Sync and External Integrations",
+      "page": 8,
+      "overview": "Distinguish a copied synced table from ordinary-table HubSpot field mapping and understand conflict resolution.",
+      "terms": [
+        {
+          "term": "Integration connection",
+          "definition": "Stored credential/config for an external provider.",
+          "example": "HubSpot account connection.",
+          "use": "Shared external integrations."
+        },
+        {
+          "term": "AES-256-GCM",
+          "definition": "Authenticated symmetric encryption algorithm.",
+          "example": "Encrypt provider credentials.",
+          "use": "Protect secrets at rest."
+        },
+        {
+          "term": "Synced table",
+          "definition": "Read-only mirror from another system into TableOS.",
+          "example": "Airtable or Gmail data copied.",
+          "use": "Scheduled ingestion."
+        },
+        {
+          "term": "Incremental pull",
+          "definition": "Fetch changes since previous checkpoint.",
+          "example": "Recent HubSpot updates.",
+          "use": "Efficient refresh."
+        },
+        {
+          "term": "Full resync",
+          "definition": "Re-fetch complete source for reconciliation.",
+          "example": "Daily full read.",
+          "use": "Correct missed changes."
+        },
+        {
+          "term": "Two-way sync",
+          "definition": "Changes can flow in both directions.",
+          "example": "TableOS and HubSpot edit a deal.",
+          "use": "Bidirectional integration."
+        },
+        {
+          "term": "Field mapping",
+          "definition": "Associating a TableOS field with a provider property.",
+          "example": "Email ↔ hs_email.",
+          "use": "Schema correspondence."
+        },
+        {
+          "term": "Match key",
+          "definition": "Attribute used to pair records lacking stored IDs.",
+          "example": "Email.",
+          "use": "Cross-system identity resolution."
+        },
+        {
+          "term": "Conflict resolution",
+          "definition": "Choosing a value when both systems edited same field.",
+          "example": "Newer change wins.",
+          "use": "Deterministic sync."
+        },
+        {
+          "term": "Sync checkpoint",
+          "definition": "Last observed values/state saved for each side.",
+          "example": "hubspot_link_records.",
+          "use": "Detect changed fields."
+        },
+        {
+          "term": "Push queue",
+          "definition": "Buffered outbound updates to another system.",
+          "example": "table_sync_pushes.",
+          "use": "Retry external writes."
+        },
+        {
+          "term": "OAuth PKCE",
+          "definition": "Proof Key for Code Exchange strengthening OAuth authorization code flow.",
+          "example": "Gmail connection from browser.",
+          "use": "Reduce code interception risk."
+        },
+        {
+          "term": "Property cache",
+          "definition": "Locally stored provider field definitions.",
+          "example": "core.hubspot_properties.",
+          "use": "Efficient mapping UI."
+        }
+      ],
+      "flow": [
+        "Owner configures encrypted organization-shared connection.",
+        "Synced table pulls another TableOS base, Airtable table, HubSpot object or Gmail inbox; it normally presents read-only copied data.",
+        "HubSpot field mapping instead links an ordinary table to provider object properties; each mapping has one of three directions.",
+        "Match records using stored HubSpot ID or configured match key; create unmatched records on the permitted side.",
+        "Compare saved per-side field values to see what changed; when both changed a two-way field, source says newer edit wins.",
+        "Run periodically (5–1,440 minutes), shortly after an edit, or manually; HubSpot properties refresh hourly. Source states deletes are not propagated."
+      ],
+      "example": "Learning example: Map local Deals.Amount ↔ HubSpot Deals.amount. TableOS becomes 500, HubSpot becomes 600 later, both since last sync; the latest change wins according to the documented policy. Record IDs and values are illustrative. This is not a proof of conflict-safety in all clock scenarios.",
+      "questions": [
+        {
+          "prompt": "Who manages organization-shared integration connections in the PDF?",
+          "options": [
+            "Only Owners",
+            "Every guest",
+            "Only workers",
+            "Anonymous visitors"
+          ],
+          "answer": 0,
+          "why": "Connections are owner-managed and stored encrypted.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "What distinguishes a synced table from HubSpot field mapping?",
+          "options": [
+            "They are always identical",
+            "Synced table copies a source into a read-only table; mapping syncs selected fields on an ordinary table",
+            "Mapping uses no credentials",
+            "Synced tables only store images"
+          ],
+          "answer": 1,
+          "why": "These are distinct integration features and workflows.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "What happens if both sides changed the same two-way mapped field?",
+          "options": [
+            "Delete both values",
+            "Newer change wins under documented rule",
+            "User must always choose manually",
+            "Disable all records"
+          ],
+          "answer": 1,
+          "why": "The document says newer change wins after tracking last values on each side.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: shared connection → select source → pair records → compare changed fields → apply direction → update/checkpoint."
+    },
+    {
+      "title": "12. Automations, Interfaces and Sharing",
+      "page": 8,
+      "overview": "Learn how automation triggers and steps execute durably, and why public experiences have limited tokens.",
+      "terms": [
+        {
+          "term": "Automation trigger",
+          "definition": "Condition starting a workflow.",
+          "example": "Record created or form submitted.",
+          "use": "React to business events."
+        },
+        {
+          "term": "Automation step",
+          "definition": "Action within a workflow.",
+          "example": "Send email or update record.",
+          "use": "Execute business work."
+        },
+        {
+          "term": "Durable run state",
+          "definition": "Persisted workflow run/step progress.",
+          "example": "Postgres run tables.",
+          "use": "Resume and inspect failures."
+        },
+        {
+          "term": "Idempotency",
+          "definition": "Repeated execution gives the same intended effect.",
+          "example": "Deduplicate webhook delivery.",
+          "use": "Avoid duplicated effects."
+        },
+        {
+          "term": "Loop guard",
+          "definition": "Check preventing automation from retriggering itself forever.",
+          "example": "Update causing another update trigger.",
+          "use": "Protect system resources."
+        },
+        {
+          "term": "Service session",
+          "definition": "Short-lived identity for automation execution.",
+          "example": "Run as automation owner.",
+          "use": "Permission scoping and audit."
+        },
+        {
+          "term": "Public interface",
+          "definition": "Page-based app over selected base data.",
+          "example": "Customer issue submission page.",
+          "use": "Tailored no-account access."
+        },
+        {
+          "term": "Share link",
+          "definition": "Tokenized access to a limited public view or form.",
+          "example": "Public feedback form URL.",
+          "use": "Controlled sharing."
+        },
+        {
+          "term": "Rate limit",
+          "definition": "Bound on actions/requests in time.",
+          "example": "Max form submissions/minute.",
+          "use": "Abuse prevention."
+        },
+        {
+          "term": "Webhook trigger",
+          "definition": "Incoming HTTP event that starts an automation.",
+          "example": "CRM sends event.",
+          "use": "External orchestration."
+        }
+      ],
+      "flow": [
+        "Create automation trigger (record created/updated/matches, form, schedule, webhook or button).",
+        "Configure ordered actions (create/update records, email, Slack, webhook, script).",
+        "Store run/step state in Postgres and execute steps via BullMQ.",
+        "Guard against duplicate execution and loops; run in the owner's permission context.",
+        "Short-lived service session may access masked values for authorized operations; such reveal access is logged.",
+        "Public views/forms/interfaces use distinct share tokens and rate limits in the separate public app."
+      ],
+      "example": "Learning example: Ticket created → automation triggers → worker creates run record → sends Slack notification → marks step completed. If worker retries, idempotency should prevent duplicate notifications; exact implementation specifics beyond described guarantees are not given.",
+      "questions": [
+        {
+          "prompt": "Which can trigger a TableOS automation?",
+          "options": [
+            "Record update",
+            "Only GCS deletion",
+            "Only database migration",
+            "Only an admin's browser refresh"
+          ],
+          "answer": 0,
+          "why": "The PDF lists record changes, form submissions, schedules, webhooks and buttons.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Why store automation run and step state in PostgreSQL?",
+          "options": [
+            "To improve CSS",
+            "To make execution durable and inspectable",
+            "To replace authentication",
+            "To store audio"
+          ],
+          "answer": 1,
+          "why": "Persisted states survive worker interruptions and support retries.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "An automation updates the same field that triggers itself repeatedly. What guards against runaway execution?",
+          "options": [
+            "Loop guard",
+            "CORS",
+            "Signed URL",
+            "Sidecar index"
+          ],
+          "answer": 0,
+          "why": "Loop guards are explicitly documented for automation safety.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: trigger → durable run → queued steps → owner-scoped execution → idempotent completion."
+    },
+    {
+      "title": "13. Security, Roles and Access",
+      "page": 8,
+      "overview": "Understand layered authentication and authorization without confusing organization account type, base role and field visibility.",
+      "terms": [
+        {
+          "term": "Account type",
+          "definition": "Organization-wide level: Owner, Admin or Member.",
+          "example": "Owner can manage connectors.",
+          "use": "High-level governance."
+        },
+        {
+          "term": "Workspace/base role",
+          "definition": "Resource-scoped permissions: Owner, Creator, Editor, Commenter, Read only, Interface only or No access.",
+          "example": "Editor in Sales base.",
+          "use": "Least-privilege access."
+        },
+        {
+          "term": "Session token",
+          "definition": "Credential representing signed-in browser session.",
+          "example": "Hashed token in core.sessions.",
+          "use": "Authentication."
+        },
+        {
+          "term": "Bearer API token",
+          "definition": "Credential sent in Authorization header.",
+          "example": "tos_-prefixed token.",
+          "use": "Programmatic access."
+        },
+        {
+          "term": "Token hash",
+          "definition": "One-way digest used instead of storing raw bearer token.",
+          "example": "Hash stored for API token.",
+          "use": "Limit exposure if DB leaked."
+        },
+        {
+          "term": "Token scope",
+          "definition": "Set of allowed operations/resources.",
+          "example": "Read/write/delete; chosen bases.",
+          "use": "Fine-grained API privileges."
+        },
+        {
+          "term": "TOTP",
+          "definition": "Time-based one-time password factor.",
+          "example": "Authenticator code.",
+          "use": "MFA protection."
+        },
+        {
+          "term": "Device approval",
+          "definition": "Owner approval for a browser device to access an organization.",
+          "example": "Approve a new laptop.",
+          "use": "Account/device governance."
+        },
+        {
+          "term": "Field-level permission",
+          "definition": "Fine-grained control of field editing/reveal.",
+          "example": "Only finance edits Salary.",
+          "use": "Protect sensitive columns."
+        },
+        {
+          "term": "Sensitive-field masking",
+          "definition": "Return obscured values until authorized reveal.",
+          "example": "******** for phone.",
+          "use": "Controlled disclosure."
+        },
+        {
+          "term": "Master token",
+          "definition": "Owner-only high-privilege API token reaching all bases and sensitive fields.",
+          "example": "Owner maintenance script.",
+          "use": "Special privileged API use."
+        },
+        {
+          "term": "Invitation token",
+          "definition": "Time-limited join link stored protected.",
+          "example": "7-day invite.",
+          "use": "Safe onboarding."
+        },
+        {
+          "term": "Audit event",
+          "definition": "Recorded security-relevant action.",
+          "example": "Token usage or unmask.",
+          "use": "Accountability."
+        }
+      ],
+      "flow": [
+        "Request authenticates using browser session or bearer API token.",
+        "MFA, forced password change and approved device policy are enforced at authentication boundary.",
+        "Account type plus workspace/base roles and grants produce compiled access snapshot.",
+        "Route checks a specific action; field edit and sensitive reveal rules add finer checks.",
+        "Owner alone manages Members & access and Connectors; Admin has operational powers but not those settings.",
+        "API tokens have scopes, base restrictions, expiry and rate limits; logged calls and revocation are documented."
+      ],
+      "example": "Example (illustrative): a Member has Editor role in the Support base but No access to Finance. The compiled snapshot allows record.update in Support only. The document also describes owner-only master-token behavior including unmask, and that such tokens stop when the creator loses Owner status.",
+      "questions": [
+        {
+          "prompt": "Who can manage organization connectors according to the PDF?",
+          "options": [
+            "Owner",
+            "Admin and Member automatically",
+            "Any base commenter",
+            "Unauthenticated users"
+          ],
+          "answer": 0,
+          "why": "Owner alone manages connections and connector settings.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Does having organization Admin status automatically grant access to every base?",
+          "options": [
+            "Yes",
+            "No, Admin opens only bases it has been granted",
+            "Only via WebSocket",
+            "Only with a signed URL"
+          ],
+          "answer": 1,
+          "why": "The table says Owners have all; Admins and Members have 'given' base access.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "What happens to an owner's master token after its creator is no longer an Owner?",
+          "options": [
+            "It remains universally valid",
+            "It stops working",
+            "It becomes a public share link",
+            "It changes to a TOTP code"
+          ],
+          "answer": 1,
+          "why": "The source explicitly states master token rights depend on the creator retaining Owner status.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: identity → organization account type → workspace/base role → specific action → field-level rules."
+    },
+    {
+      "title": "14. History, Undo, Trash and Audit",
+      "page": 9,
+      "overview": "Distinguish ordinary record history from recoverable deletion and organization-wide security audit.",
+      "terms": [
+        {
+          "term": "Record revision",
+          "definition": "Persisted record-change version.",
+          "example": "Status changed from Open to Done.",
+          "use": "Activity/history."
+        },
+        {
+          "term": "Undo/redo",
+          "definition": "Ability to reverse or reapply prior edits.",
+          "example": "Undo accidental status edit.",
+          "use": "User experience recovery."
+        },
+        {
+          "term": "Deletion batch",
+          "definition": "Saved group of deleted items for restoration.",
+          "example": "data.deletion_batches.",
+          "use": "Trash recovery."
+        },
+        {
+          "term": "Trash purge",
+          "definition": "Scheduled permanent removal of expired trash items.",
+          "example": "Retention job.",
+          "use": "Storage and lifecycle."
+        },
+        {
+          "term": "Retention",
+          "definition": "Policy defining how long history or trash is kept.",
+          "example": "Purge after policy window.",
+          "use": "Data lifecycle."
+        },
+        {
+          "term": "Audit trail",
+          "definition": "Security event log for accountability.",
+          "example": "Sign-in or token change.",
+          "use": "Incident review."
+        },
+        {
+          "term": "audit_events",
+          "definition": "PostgreSQL table of security-relevant actions.",
+          "example": "Device approval recorded.",
+          "use": "Compliance/operations."
+        },
+        {
+          "term": "Record activity",
+          "definition": "Per-record list of changes.",
+          "example": "Who edited the field.",
+          "use": "Collaboration context."
+        }
+      ],
+      "flow": [
+        "Each record edit writes a record_revisions entry.",
+        "Users can view record activity and use per-base undo/redo, including after page reload.",
+        "Deleted records are tracked in deletion_batches so they can be restored from trash.",
+        "Schedulers enforce retention and purge eligible trash.",
+        "Security-relevant actions write to audit.audit_events rather than being mixed with ordinary row history."
+      ],
+      "example": "Learning scenario: An editor deletes a customer record, then restores it from Trash. The record's ordinary changes belong in record_revisions; a security-setting change belongs in audit.audit_events. Which exact data is retained depends on platform retention policy not enumerated in the source.",
+      "questions": [
+        {
+          "prompt": "Which table records ordinary record revisions?",
+          "options": [
+            "record_revisions",
+            "audit_events only",
+            "core.sessions",
+            "table_sync_pushes"
+          ],
+          "answer": 0,
+          "why": "Record history lives in data.record_revisions.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Where are deleted records tracked for restoration?",
+          "options": [
+            "deletion_batches",
+            "Redis locks only",
+            "Frontend CSS",
+            "GCS signature"
+          ],
+          "answer": 0,
+          "why": "Deletion batches represent recoverable trash.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "How do record history and security audit differ?",
+          "options": [
+            "They are identical",
+            "Revisions describe record edits; audit_events describe security-relevant actions",
+            "Audit is only in browser",
+            "History never persists"
+          ],
+          "answer": 1,
+          "why": "They serve separate accountability needs.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: revisions = data history; deletion batches = trash; audit_events = security activity."
+    },
+    {
+      "title": "15. Operations, Releases and Limits",
+      "page": 9,
+      "overview": "Know how TableOS is tested, released, deployed and monitored, and distinguish deployed limits from planned scaling.",
+      "terms": [
+        {
+          "term": "Release branch",
+          "definition": "Branch holding a prepared version release.",
+          "example": "release/v0.36.0.",
+          "use": "Controlled delivery."
+        },
+        {
+          "term": "Type check",
+          "definition": "Static TypeScript validation.",
+          "example": "tsc --noEmit.",
+          "use": "Catch type errors."
+        },
+        {
+          "term": "Regression test",
+          "definition": "Test that old behavior still works after changes.",
+          "example": "Record editing still updates search.",
+          "use": "Prevent breakage."
+        },
+        {
+          "term": "Playwright",
+          "definition": "Browser automation framework.",
+          "example": "Check editing workflow with screenshots.",
+          "use": "End-to-end QA."
+        },
+        {
+          "term": "Migration on startup",
+          "definition": "API applies outstanding schema migrations when launched.",
+          "example": "New table migration.",
+          "use": "Database compatibility."
+        },
+        {
+          "term": "Structured logs",
+          "definition": "Machine-readable request/event logs.",
+          "example": "pino JSON.",
+          "use": "Troubleshooting."
+        },
+        {
+          "term": "p95 latency",
+          "definition": "Latency below which 95% of measured requests fall.",
+          "example": "95% of API calls under target.",
+          "use": "Tail performance."
+        },
+        {
+          "term": "Grafana dashboard",
+          "definition": "Operational charts for metrics.",
+          "example": "CPU, memory, latency and DB health.",
+          "use": "Monitoring."
+        },
+        {
+          "term": "Capacity limit",
+          "definition": "Documented product/infrastructure bound.",
+          "example": "50,000 records per synced table.",
+          "use": "Product planning."
+        },
+        {
+          "term": "Sharding",
+          "definition": "Partitioning data across multiple database instances.",
+          "example": "Target architecture, not deployed.",
+          "use": "Potential future scale."
+        },
+        {
+          "term": "Release approval",
+          "definition": "Human sign-off before merging a release.",
+          "example": "Merge to master only after approval.",
+          "use": "Production governance."
+        }
+      ],
+      "flow": [
+        "Develop changes on a feature branch and test locally with dummy data.",
+        "Run type checks, server build, regression scripts and Playwright UI check with screenshots.",
+        "Bump version; push release/vX.Y.Z to complete remote.",
+        "Merge approved release to master; Render deploys master.",
+        "API applies missing migrations on startup; deployment restarts API, realtime, worker and relay.",
+        "Observe Grafana metrics and Render pino JSON logs; investigate incidents using request status and timing."
+      ],
+      "example": "As built limits (19 Nov 2026): one PostgreSQL and one Redis/Valkey instance for all tenants; each synced table up to 50,000 records; incremental HubSpot search capped at 10,000 changes before a full read; HubSpot field mapping does not propagate deletes. These are source-dated statements.",
+      "questions": [
+        {
+          "prompt": "Which branch does the PDF say Render deploys for TableOS?",
+          "options": [
+            "master",
+            "Any arbitrary developer branch",
+            "Only gh-pages",
+            "The original architecture folder"
+          ],
+          "answer": 0,
+          "why": "It describes approved releases merged into master, which Render deploys. Note: this is TableOS, not the Learning Studio repo.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "What quality checks precede a TableOS release?",
+          "options": [
+            "Type checks, server build, regression scripts and Playwright",
+            "Only unit test count",
+            "No tests ever",
+            "Only database dump"
+          ],
+          "answer": 0,
+          "why": "The documented release workflow explicitly lists those checks.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "Which scalability feature is a target design rather than deployed?",
+          "options": [
+            "Single shared Postgres",
+            "Sharded data plane with Kafka-style log",
+            "BullMQ worker queues",
+            "Private object storage"
+          ],
+          "answer": 1,
+          "why": "The PDF says the sharded/Kafka-style original design is not built.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: describe the actual deployment, release branch policy and known limits—never present the target architecture as deployed."
+    },
+    {
+      "title": "16. Further Reading and Full-System Review",
+      "page": 9,
+      "overview": "Turn the whole design into one interview-ready explanation; the PDF names references you can open in the real TableOS source repository.",
+      "terms": [
+        {
+          "term": "As-built design",
+          "definition": "Documentation of the currently implemented/deployed system at a dated snapshot.",
+          "example": "SYSTEM-DESIGN.md v0.36.0.",
+          "use": "Accurate architecture discussions."
+        },
+        {
+          "term": "Target architecture",
+          "definition": "Design planned before implementation.",
+          "example": "architecture/ sharded data plane.",
+          "use": "Future-state direction."
+        },
+        {
+          "term": "ADR",
+          "definition": "Architecture Decision Record explaining a choice and trade-off.",
+          "example": "Decision to use JSONB slots.",
+          "use": "Rationale and constraints."
+        },
+        {
+          "term": "CHANGELOG.md",
+          "definition": "Version-by-version record of changes.",
+          "example": "Read changes since v0.36.0.",
+          "use": "Release tracking."
+        },
+        {
+          "term": "Work log",
+          "definition": "Chronological implementation/verification notes.",
+          "example": "docs/TABLEOS-WORK-LOG.md.",
+          "use": "Understand build history."
+        },
+        {
+          "term": "API reference",
+          "definition": "Endpoint contracts and examples for integrators.",
+          "example": "Help → API reference.",
+          "use": "Developer onboarding."
+        },
+        {
+          "term": "System diagram",
+          "definition": "Visual explanation of components and interactions.",
+          "example": "Browser → API → Postgres → Redis.",
+          "use": "Architecture communication."
+        },
+        {
+          "term": "Trade-off",
+          "definition": "Cost accepted to gain a benefit.",
+          "example": "JSONB flexibility vs typed index sidecars.",
+          "use": "Design justification."
+        },
+        {
+          "term": "Failure mode",
+          "definition": "Way a component can become unavailable or inconsistent.",
+          "example": "Relay temporarily down.",
+          "use": "Resilience planning."
+        }
+      ],
+      "flow": [
+        "Start explanation at organization → workspace → base → table → record.",
+        "Name API, realtime, worker and relay around PostgreSQL/Redis and private GCS.",
+        "Describe one record change, emphasizing a single DB transaction and outbox.",
+        "Describe websocket sequence replay, compute dependencies and typed index sidecars.",
+        "Explain automation, synced tables, HubSpot mapping and access layers.",
+        "Conclude with limits, monitoring, release process and next architectural improvements."
+      ],
+      "example": "Interview script: 'TableOS is a multi-tenant relational workspace product with flexible JSONB record storage. Fastify handles authenticated requests; changes commit with revisions, base changes and an outbox. Redis/Valkey distributes realtime and jobs; a relay publishes durable events; workers handle search, automation and sync. Private GCS stores files. The current deployment uses a single Postgres/Redis; sharding is a future target.'",
+      "questions": [
+        {
+          "prompt": "Which document describes what TableOS actually ran on 19 Nov 2026?",
+          "options": [
+            "System Design — as built v0.36.0",
+            "Only the original ADRs",
+            "Only UI CSS",
+            "Only the future sharded design"
+          ],
+          "answer": 0,
+          "why": "The uploaded PDF is explicitly the current-state companion to the earlier architecture target.",
+          "level": "Basic"
+        },
+        {
+          "prompt": "Where should an engineer inspect why architecture decisions were chosen?",
+          "options": [
+            "architecture/ ADRs",
+            "Only public share links",
+            "A table view color",
+            "GCS thumbnails"
+          ],
+          "answer": 0,
+          "why": "ADRs capture design rationale; work log and change log explain implementation.",
+          "level": "Medium"
+        },
+        {
+          "prompt": "What is the strongest concise TableOS system-design explanation?",
+          "options": [
+            "It's only a React spreadsheet",
+            "It uses flexible record storage, atomic changes/outbox, realtime gateway, jobs, permissions and private file storage",
+            "It already uses Kafka shards in production",
+            "It has no permissions"
+          ],
+          "answer": 1,
+          "why": "This answer connects the major as-built subsystems and avoids conflating them with target architecture.",
+          "level": "Advanced"
+        }
+      ],
+      "remember": "Remember: always distinguish PDF source facts from learning examples, and current implementation from target architecture."
+    }
+  ]
+}
