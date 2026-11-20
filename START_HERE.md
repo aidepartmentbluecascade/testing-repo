@@ -4,11 +4,12 @@ A personal learning portal built from **Understand your CV: A foundations-first 
 
 ## Interactive 3-Day Associate Backend Engineer Bootcamp
 
-The homepage provides direct access to three separate interactive learning dashboards. Each includes eight modules, concise **Term: Definition** explanations, examples, backend use cases, 24 interview questions, answer feedback, topic skipping, notes, and browser-local progress.
+The homepage provides direct access to three day-based learning dashboards and a separate **TableOS System Design** section immediately after Day 3. Each includes eight modules, concise **Term: Definition** explanations, examples, backend use cases, 24 interview questions, answer feedback, topic skipping, notes, and browser-local progress.
 
 - **[Day 1 — AI, LLMs, RAG & Agents](/day1):** AI/ML, LLM fundamentals, prompting, RAG, evaluation, agents, orchestration and guardrails.
 - **[Day 2 — Backend Engineering & Databases](/day2):** Python, Node.js, APIs, PostgreSQL, Redis, security, architecture and queues. [Detailed reference guide](docs/interview-preparation/day-2/README.md).
 - **[Day 3 — MLOps, Cloud, Voice AI & Mock Interview](/day3):** ML frameworks, deployment, CI/CD, voice AI, frontend, integrations, system design and mock interviews.
+- **[TableOS — System Design Study Hub](/tableos):** A separate interactive section immediately after Day 3, based on the uploaded v0.36.0 as-built PDF. Covers all 16 source sections with 205 definitions, working flows, illustrative examples and 48 interview questions. [Complete written study guide](docs/interview-preparation/tableos/README.md).
 
 ## Updating from the previous portal
 

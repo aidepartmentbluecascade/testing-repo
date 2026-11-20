@@ -271,10 +271,21 @@ class PortalHandler(BaseHTTPRequestHandler):
         if path == "/api/health":
             self.send_json(200, {"aiAvailable": self.server.service.enabled,
                                  "model": self.server.service.model or None, "csrfToken": self.server.csrf_token})
+        elif path == "/tableos-study.json":
+            body = (ROOT / "tableos-study.json").read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(body)
         elif path in {"/", "/index.html"}:
             body = (ROOT / "index.html").read_bytes()
             day2_link = ("<script>(function(){const days=[{n:1,t:\"AI, LLMs, RAG & Agents\",d:\"LLMs, RAG, embeddings, agents, evaluation and guardrails\"},{n:2,t:\"Backend Engineering & Databases\",d:\"Python, Node.js, APIs, PostgreSQL, Redis and security\"},{n:3,t:\"MLOps, Cloud, Voice AI & Mock Interview\",d:\"Docker, CI/CD, voice AI, integrations and system design\"}];function add(){const side=document.getElementById(\"sidebar\"),nav=side&&side.querySelector(\"nav\");if(nav)days.forEach(x=>{if(document.getElementById(\"day\"+x.n+\"PortalLink\"))return;const a=document.createElement(\"a\");a.id=\"day\"+x.n+\"PortalLink\";a.href=\"/day\"+x.n;a.className=\"navbtn\";a.style.textDecoration=\"none\";a.textContent=\"Day \"+x.n+\" · \"+x.t;nav.appendChild(a)});const main=document.getElementById(\"main\"),hero=main&&main.querySelector(\".hero\");if(hero&&!document.getElementById(\"interviewBootcampCards\")){const section=document.createElement(\"section\");section.id=\"interviewBootcampCards\";section.className=\"card\";section.style.cssText=\"margin-bottom:22px;border:1px solid #cbd2ff;background:linear-gradient(110deg,#eef0ff,#fff)\";section.innerHTML='<div class=\"eyebrow\">3-DAY ASSOCIATE BACKEND ENGINEER BOOTCAMP</div><h2>Choose your interview preparation day</h2><div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px\">'+days.map(x=>'<a href=\"/day'+x.n+'\" style=\"display:block;padding:16px;border-radius:12px;background:white;border:1px solid #dfe3f3;text-decoration:none;color:#263047\"><strong>Day '+x.n+' · '+x.t+'</strong><p style=\"font-size:13px;color:#697386\">'+x.d+'</p><span style=\"font-size:13px;font-weight:700;color:#4d5bd0\">8 modules · 24 questions →</span></a>').join(\"\")+'</div>';main.insertBefore(section,hero);const old=document.getElementById(\"day2HomepageCard\");if(old)old.remove()}}function init(){const side=document.getElementById(\"sidebar\"),main=document.getElementById(\"main\");if(side)new MutationObserver(add).observe(side,{childList:true,subtree:true});if(main)new MutationObserver(add).observe(main,{childList:true});add()}if(document.readyState===\"loading\")document.addEventListener(\"DOMContentLoaded\",init,{once:true});else init()})();</script>").encode("utf-8")
             body = body.replace(b"</body>", day2_link + b"</body>")
+            tableos_link = ("<script>(function(){function add(){const nav=document.querySelector(\"#sidebar nav\");if(nav&&!document.getElementById(\"tableosStudyNav\")){const a=document.createElement(\"a\");a.id=\"tableosStudyNav\";a.className=\"navbtn\";a.style.textDecoration=\"none\";a.href=\"/tableos\";a.textContent=\"TableOS · System Design\";nav.appendChild(a)}const section=document.getElementById(\"interviewBootcampCards\");if(!section)return;const grid=section.querySelector('div[style*=\"grid-template-columns\"]');if(grid&&!document.getElementById(\"tableosStudyCard\")){const a=document.createElement(\"a\");a.id=\"tableosStudyCard\";a.href=\"/tableos\";a.style.cssText=\"display:block;padding:16px;border-radius:12px;background:white;border:1px solid #dfe3f3;text-decoration:none;color:#263047\";a.innerHTML='<strong>TableOS · System Design</strong><p style=\"font-size:13px;color:#697386\">16 sections · as-built architecture, examples and real-system workflows</p><span style=\"font-size:13px;font-weight:700;color:#4d5bd0\">205 definitions · 48 questions →</span>';grid.appendChild(a)}}function init(){const sidebar=document.getElementById(\"sidebar\"),main=document.getElementById(\"main\");if(sidebar)new MutationObserver(add).observe(sidebar,{childList:true,subtree:true});if(main)new MutationObserver(add).observe(main,{childList:true,subtree:true});add()}if(document.readyState===\"loading\")document.addEventListener(\"DOMContentLoaded\",init,{once:true});else init()})();</script>").encode("utf-8")
+            body = body.replace(b"</body>", tableos_link + b"</body>")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -284,7 +295,7 @@ class PortalHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(body)
-        elif path in {"/day1", "/day1.html", "/day2", "/day2.html", "/day3", "/day3.html"}:
+        elif path in {"/day1", "/day1.html", "/day2", "/day2.html", "/day3", "/day3.html", "/tableos", "/tableos.html"}:
             day = path.split("/")[1].split(".")[0]
             body = (ROOT / (day + ".html")).read_bytes()
             self.send_response(200)
