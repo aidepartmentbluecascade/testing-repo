@@ -5,7 +5,7 @@
     "version": "0.36.0",
     "date": "19 November 2026",
     "pages": 9,
-    "notice": "Based on the uploaded 9-page PDF. Deployed-system facts are attributed to the document's 19 Nov 2026 snapshot. Teaching examples are illustrations, not independently verified system behavior."
+    "notice": "Based on the uploaded 9-page PDF. Deployed-system facts are attributed to the document's 19 Nov 2026 snapshot. Teaching examples are illustrations, not independently verified system behavior. The 31 individual field types are explained in Module 8."
   },
   "modules": [
     {
@@ -868,7 +868,7 @@
     {
       "title": "8. Fields, Formulas and Compute",
       "page": 7,
-      "overview": "Learn the field engine: typed validation, dependency tracking, calculated values and sensitive-data policies.",
+      "overview": "Learn the field engine: typed validation, dependency tracking, calculated values and sensitive-data policies. The complete 31-field-type glossary is included below, reflecting the exact field-type family listed in the document.",
       "terms": [
         {
           "term": "Field type",
@@ -947,6 +947,192 @@
           "definition": "Allowed people who may reveal selected sensitive fields.",
           "example": "Authorized support lead.",
           "use": "Controlled unmasking."
+        },
+        {
+          "term": "Text field",
+          "definition": "Stores a short string value.",
+          "example": "Lead name = Ali.",
+          "use": "Names, labels and titles."
+        },
+        {
+          "term": "Long text field",
+          "definition": "Stores longer multi-line text.",
+          "example": "Issue description paragraph.",
+          "use": "Notes and free-form text."
+        },
+        {
+          "term": "Checkbox field",
+          "definition": "Stores a checked/unchecked choice.",
+          "example": "Approved = true.",
+          "use": "Binary states."
+        },
+        {
+          "term": "Single select field",
+          "definition": "Stores one value from configured options.",
+          "example": "Status = Open.",
+          "use": "Consistent categorization."
+        },
+        {
+          "term": "Multiple select field",
+          "definition": "Stores several selected options.",
+          "example": "Tags = Urgent, VIP.",
+          "use": "Multi-label classification."
+        },
+        {
+          "term": "User field",
+          "definition": "References or identifies a team member.",
+          "example": "Assigned to = Support Agent.",
+          "use": "Responsibility and ownership."
+        },
+        {
+          "term": "Date field",
+          "definition": "Stores a calendar date.",
+          "example": "Due date = 2026-12-01.",
+          "use": "Scheduling."
+        },
+        {
+          "term": "Date and time field",
+          "definition": "Stores a point in time with time component.",
+          "example": "Meeting = 15:30.",
+          "use": "Timestamped workflow."
+        },
+        {
+          "term": "Phone field",
+          "definition": "Stores a phone value subject to type rules and masking.",
+          "example": "+92… contact number.",
+          "use": "Communication and privacy controls."
+        },
+        {
+          "term": "Email field",
+          "definition": "Stores an email value subject to type rules and masking.",
+          "example": "support@example.com.",
+          "use": "Contact and sensitive-data control."
+        },
+        {
+          "term": "URL field",
+          "definition": "Stores a web address.",
+          "example": "https://example.com.",
+          "use": "External links."
+        },
+        {
+          "term": "Number field",
+          "definition": "Stores a numeric value.",
+          "example": "Quantity = 12.",
+          "use": "Arithmetic, filtering and sorting."
+        },
+        {
+          "term": "Currency field",
+          "definition": "Stores a money-formatted numeric amount.",
+          "example": "Revenue = 12,500 PKR.",
+          "use": "Financial data."
+        },
+        {
+          "term": "Percent field",
+          "definition": "Stores/displays a percentage-type value.",
+          "example": "Completion = 75%.",
+          "use": "Progress and rates."
+        },
+        {
+          "term": "Duration field",
+          "definition": "Stores a span of time.",
+          "example": "Task duration = 90 minutes.",
+          "use": "Time tracking."
+        },
+        {
+          "term": "Rating field",
+          "definition": "Stores a bounded rating-like value.",
+          "example": "Priority score = 4/5.",
+          "use": "Scoring."
+        },
+        {
+          "term": "Attachment field",
+          "definition": "Associates files with a record.",
+          "example": "Contract PDF.",
+          "use": "Document storage."
+        },
+        {
+          "term": "Link-to-record field",
+          "definition": "Connects one record to records in another table.",
+          "example": "Deal → Company.",
+          "use": "Relationships."
+        },
+        {
+          "term": "Barcode field",
+          "definition": "Holds a barcode-oriented identifier.",
+          "example": "SKU barcode.",
+          "use": "Inventory workflows."
+        },
+        {
+          "term": "Button field",
+          "definition": "Represents a record-level action control.",
+          "example": "Run automation.",
+          "use": "Interactive actions."
+        },
+        {
+          "term": "JSON field",
+          "definition": "Stores structured JSON content.",
+          "example": "{source:'crm'}.",
+          "use": "Nested integration metadata."
+        },
+        {
+          "term": "Formula field",
+          "definition": "Evaluates an expression based on other values.",
+          "example": "Quantity * Price.",
+          "use": "Derived numeric/text values."
+        },
+        {
+          "term": "Lookup field",
+          "definition": "Reads related-record values.",
+          "example": "Company industry via link.",
+          "use": "Cross-table display."
+        },
+        {
+          "term": "Rollup field",
+          "definition": "Aggregates values from linked records.",
+          "example": "SUM(invoice amounts).",
+          "use": "Aggregated metrics."
+        },
+        {
+          "term": "Count field",
+          "definition": "Counts related or matching records.",
+          "example": "Number of linked tickets.",
+          "use": "Relationship totals."
+        },
+        {
+          "term": "Autonumber field",
+          "definition": "Assigns an automatically increasing record number.",
+          "example": "Ticket #1205.",
+          "use": "Human-friendly sequence."
+        },
+        {
+          "term": "TOS Record ID field",
+          "definition": "Exposes a record's stable prefixed public identifier.",
+          "example": "tos_…",
+          "use": "Integrations and identity."
+        },
+        {
+          "term": "Created time field",
+          "definition": "Displays when the record was created.",
+          "example": "Created on 19 Nov.",
+          "use": "Record metadata."
+        },
+        {
+          "term": "Modified time field",
+          "definition": "Displays when the record last changed.",
+          "example": "Edited at 14:20.",
+          "use": "Change tracking."
+        },
+        {
+          "term": "Created by field",
+          "definition": "Displays which user created a record.",
+          "example": "Created by Alice.",
+          "use": "Accountability."
+        },
+        {
+          "term": "Modified by field",
+          "definition": "Displays which user last updated a record.",
+          "example": "Updated by Bob.",
+          "use": "Edit provenance."
         }
       ],
       "flow": [
