@@ -1,34 +1,33 @@
 # TableOS System Design — Complete Study Guide
 
-**Source:** *TableOS — System Design (as built)*, version **0.36.0**, dated **19 November 2026**. This guide restructures the uploaded 9-page PDF into a learnable course. **As-built claims refer only to that snapshot.** Practical examples are explicitly illustrative, not a claim that an actual specific customer record or incident occurred.
+**Source:** TableOS — System Design (as built), **v0.36.0**, dated **19 November 2026**. This guide reorganizes the user's nine-page PDF into 16 study modules. As-built facts refer to the dated snapshot. All practical scenarios and examples are learning illustrations unless specifically stated otherwise.
 
-**Interactive version:** [Open TableOS Study Hub](https://arslan-learning-studio.onrender.com/tableos)
+**Interactive study hub:** https://arslan-learning-studio.onrender.com/tableos
 
-**Contents:** 16 modules, 174 definitions, 48 interview questions.
+**Coverage:** 16 source sections, 205 individual terms including all 31 documented field types, 48 explained interview questions.
 
-## How to use
+## Recommended study method
 
-Read the definitions in **Term: Definition** format, trace the numbered flow, explain the worked example in your own words, and then answer the basic, medium and advanced question without reading the answer key. Use the interactive dashboard to keep progress, review mistakes, ask questions and skip topics.
+For every section: (1) say each **Term: Definition** aloud, (2) connect it to the example and backend use, (3) explain the working flow in your own words, (4) rehearse the worked example, (5) attempt one question at a time in the interactive portal, (6) review mistakes before advancing. The portal includes topic skipping, progress saving and a searchable glossary.
 
-## Modules
+## Contents
 
-1. [1. What TableOS Is](#1-what-tableos-is) (PDF p. 3)
-2. [2. Deployment Topology](#2-deployment-topology) (PDF p. 3)
-3. [3. Code Structure and Libraries](#3-code-structure-and-libraries) (PDF p. 4)
-4. [4. Data Model and Record Storage](#4-data-model-and-record-storage) (PDF p. 5)
-5. [5. A Change, End to End](#5-a-change-end-to-end) (PDF p. 5)
-6. [6. Realtime and Presence](#6-realtime-and-presence) (PDF p. 6)
-7. [7. Background Work and Event Bus](#7-background-work-and-event-bus) (PDF p. 6)
-8. [8. Fields, Formulas and Compute](#8-fields-formulas-and-compute) (PDF p. 7)
-9. [9. Query Engine and Grid Rendering](#9-query-engine-and-grid-rendering) (PDF p. 7)
-10. [10. Attachment Storage and Signed Links](#10-attachment-storage-and-signed-links) (PDF p. 7)
-11. [11. Sync and External Integrations](#11-sync-and-external-integrations) (PDF p. 8)
-12. [12. Automations, Interfaces and Sharing](#12-automations-interfaces-and-sharing) (PDF p. 8)
-13. [13. Security, Roles and Access](#13-security-roles-and-access) (PDF p. 8)
-14. [14. History, Undo, Trash and Audit](#14-history-undo-trash-and-audit) (PDF p. 9)
-15. [15. Operations, Releases and Limits](#15-operations-releases-and-limits) (PDF p. 9)
-16. [16. Further Reading and Full-System Review](#16-further-reading-and-fullsystem-review) (PDF p. 9)
-
+1. 1. What TableOS Is (source p. 3)
+2. 2. Deployment Topology (source p. 3)
+3. 3. Code Structure and Libraries (source p. 4)
+4. 4. Data Model and Record Storage (source p. 5)
+5. 5. A Change, End to End (source p. 5)
+6. 6. Realtime and Presence (source p. 6)
+7. 7. Background Work and Event Bus (source p. 6)
+8. 8. Fields, Formulas and Compute (source p. 7)
+9. 9. Query Engine and Grid Rendering (source p. 7)
+10. 10. Attachment Storage and Signed Links (source p. 7)
+11. 11. Sync and External Integrations (source p. 8)
+12. 12. Automations, Interfaces and Sharing (source p. 8)
+13. 13. Security, Roles and Access (source p. 8)
+14. 14. History, Undo, Trash and Audit (source p. 9)
+15. 15. Operations, Releases and Limits (source p. 9)
+16. 16. Further Reading and Full-System Review (source p. 9)
 
 ---
 
@@ -38,7 +37,7 @@ Read the definitions in **Term: Definition** format, trace the numbered flow, ex
 
 Understand the product and its hierarchy before diving into infrastructure. This section describes the source's deployed v0.36.0 snapshot, not a promise about later releases.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **TableOS:** A team-oriented, Airtable-style relational database platform.
 
@@ -112,7 +111,7 @@ Understand the product and its hierarchy before diving into infrastructure. This
 
 **Backend use:** Third-party automation.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Organization contains workspaces.
 2. Workspace contains one or more bases.
@@ -128,34 +127,34 @@ Learning example: A support organization creates a Support workspace → Tickets
 
 Remember: TableOS is a data platform with a hierarchy plus workflows and integrations—not just a spreadsheet.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** What is the correct TableOS hierarchy?
+**Question 1 — Basic:** What is the correct TableOS hierarchy?
 
 - A. Organization → Workspace → Base → Table → Record
 - B. Record → Base → Organization → Workspace
 - C. Workspace → Organization → Field → Base
 - D. Organization → Table → Workspace → Record
 
-**Correct answer: A — Organization → Workspace → Base → Table → Record.** An organization groups workspaces; workspaces group bases; bases contain tables and records.
+**Answer: A.** An organization groups workspaces; workspaces group bases; bases contain tables and records.
 
-**Question 2 (Medium):** Which feature changes how records appear without creating another table?
+**Question 2 — Medium:** Which feature changes how records appear without creating another table?
 
 - A. View
 - B. API token
 - C. Migration
 - D. Relay
 
-**Correct answer: A — View.** Views display the same table in different layouts and with saved filtering/grouping.
+**Answer: A.** Views display the same table in different layouts and with saved filtering/grouping.
 
-**Question 3 (Advanced):** An application needs to create records from an external script. Which interface is intended?
+**Question 3 — Advanced:** An application needs to create records from an external script. Which interface is intended?
 
 - A. Only a screenshot
 - B. Public REST API with access token
 - C. Browser CSS
 - D. Grafana dashboard
 
-**Correct answer: B — Public REST API with access token.** The document explicitly lists a public REST API accessed with tokens.
+**Answer: B.** The document explicitly lists a public REST API accessed with tokens.
 
 
 ---
@@ -166,7 +165,7 @@ Remember: TableOS is a data platform with a hierarchy plus workflows and integra
 
 Trace each service in the deployed architecture. The source specifies Render Singapore for compute/database/cache and Google Cloud Storage for objects.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **API service:** The Fastify-backed service handling HTTP requests and several schedulers.
 
@@ -234,7 +233,7 @@ Trace each service in the deployed architecture. The source specifies Render Sin
 
 **Backend use:** Keep deployed schema compatible with app code.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Browser uses HTTPS to communicate with the API and WSS to the realtime gateway.
 2. API validates permissions and writes to Postgres.
@@ -251,34 +250,34 @@ As built (19 Nov 2026): API web service 2 CPU/4 GB; realtime 1 CPU/2 GB; worker 
 
 Remember: API, realtime, worker and relay are separate runtime responsibilities around a single Postgres and Redis-compatible store.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which component polls outbox_events and publishes to the Redis event bus?
+**Question 1 — Basic:** Which component polls outbox_events and publishes to the Redis event bus?
 
 - A. Web app
 - B. Relay
 - C. Public app
 - D. GCS
 
-**Correct answer: B — Relay.** The relay bridges committed PostgreSQL outbox records to the Redis event bus.
+**Answer: B.** The relay bridges committed PostgreSQL outbox records to the Redis event bus.
 
-**Question 2 (Medium):** Why store attachments in GCS instead of in the relational records table?
+**Question 2 — Medium:** Why store attachments in GCS instead of in the relational records table?
 
 - A. To make every file public
 - B. To separate large binary objects from structured data
 - C. Because Postgres cannot store JSON
 - D. To eliminate access checks
 
-**Correct answer: B — To separate large binary objects from structured data.** Object storage handles large files; PostgreSQL stores the structured metadata.
+**Answer: B.** Object storage handles large files; PostgreSQL stores the structured metadata.
 
-**Question 3 (Advanced):** Does the deployed design already use the original sharded data plane and Kafka-style log?
+**Question 3 — Advanced:** Does the deployed design already use the original sharded data plane and Kafka-style log?
 
 - A. Yes, both are live
 - B. No; the document says those belong to the target design
 - C. Only on mobile
 - D. Only for HubSpot
 
-**Correct answer: B — No; the document says those belong to the target design.** The PDF explicitly distinguishes as-built single Postgres/Redis deployment from original target architecture.
+**Answer: B.** The PDF explicitly distinguishes as-built single Postgres/Redis deployment from original target architecture.
 
 
 ---
@@ -289,7 +288,7 @@ Remember: API, realtime, worker and relay are separate runtime responsibilities 
 
 Follow the TypeScript monorepo. The same server codebase has separate entrypoints; shared packages provide reusable domain logic.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Monorepo:** Repository containing multiple apps and shared packages.
 
@@ -369,7 +368,7 @@ Follow the TypeScript monorepo. The same server codebase has separate entrypoint
 
 **Backend use:** Local UI state.
 
-### How it works, step by step
+### How the subsystem works
 
 1. apps/server contains API, realtime, worker and relay code; scheduler is listed as a stub entrypoint.
 2. apps/web builds authenticated React SPA; apps/public builds no-account shared-view and form app.
@@ -385,34 +384,34 @@ Learning example: A new Currency field involves a codec in packages/fields, a ce
 
 Remember: different apps and services share types, but each running process has a separate responsibility.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Where does the PDF locate shared field-type codecs?
+**Question 1 — Basic:** Where does the PDF locate shared field-type codecs?
 
 - A. apps/public
 - B. packages/fields
 - C. Grafana
 - D. Render dashboard
 
-**Correct answer: B — packages/fields.** The source names packages/fields for 31 field types, codecs and validation.
+**Answer: B.** The source names packages/fields for 31 field types, codecs and validation.
 
-**Question 2 (Medium):** What advantage comes from separate api and worker entrypoints in one codebase?
+**Question 2 — Medium:** What advantage comes from separate api and worker entrypoints in one codebase?
 
 - A. All jobs must share one process
 - B. Shared domain code with independently deployed runtime roles
 - C. No need for TypeScript
 - D. No network errors
 
-**Correct answer: B — Shared domain code with independently deployed runtime roles.** One codebase can reuse contracts while runtime roles are started separately.
+**Answer: B.** One codebase can reuse contracts while runtime roles are started separately.
 
-**Question 3 (Advanced):** Why must API input still be validated with Zod even if TypeScript types exist?
+**Question 3 — Advanced:** Why must API input still be validated with Zod even if TypeScript types exist?
 
 - A. Types run on untrusted JSON automatically
 - B. TypeScript types do not enforce runtime input shapes
 - C. Because Kysely is not SQL
 - D. Because React changes tokens
 
-**Correct answer: B — TypeScript types do not enforce runtime input shapes.** Types disappear at runtime; parsing/validation protects API boundaries.
+**Answer: B.** Types disappear at runtime; parsing/validation protects API boundaries.
 
 
 ---
@@ -423,7 +422,7 @@ Remember: different apps and services share types, but each running process has 
 
 Understand the three PostgreSQL schemas and why adding fields does not require new SQL columns.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **core schema:** PostgreSQL namespace for identity, tenancy, access and integrations.
 
@@ -497,7 +496,7 @@ Understand the three PostgreSQL schemas and why adding fields does not require n
 
 **Backend use:** Activity, undo and audit context.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Metadata about table fields is saved in data.fields.
 2. Editable cell values are keyed by stable slots in data.records.cells JSONB.
@@ -514,34 +513,34 @@ Illustrative storage: {cells:{'slot_a':'Ali','slot_b':1200},computed:{'slot_tota
 
 Remember: meta schema is stable; flexible user-defined fields live in JSONB and sidecar indexes.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Where do ordinary record values reside?
+**Question 1 — Basic:** Where do ordinary record values reside?
 
 - A. data.records.cells JSONB keyed by stable slots
 - B. One SQL column per user field
 - C. Only Redis
 - D. A CSV file
 
-**Correct answer: A — data.records.cells JSONB keyed by stable slots.** The source explicitly places editable values under stable slot keys in JSONB.
+**Answer: A.** The source explicitly places editable values under stable slot keys in JSONB.
 
-**Question 2 (Medium):** Why can a user add a field without a SQL ALTER TABLE?
+**Question 2 — Medium:** Why can a user add a field without a SQL ALTER TABLE?
 
 - A. No data is persisted
 - B. Field metadata and JSONB slots represent dynamic fields
 - C. Migrations are forbidden
 - D. Everything is in GCS
 
-**Correct answer: B — Field metadata and JSONB slots represent dynamic fields.** Dynamic field definitions avoid modifying the physical schema for every user column.
+**Answer: B.** Dynamic field definitions avoid modifying the physical schema for every user column.
 
-**Question 3 (Advanced):** How are numeric/date filters accelerated on large flexible tables?
+**Question 3 — Advanced:** How are numeric/date filters accelerated on large flexible tables?
 
 - A. Only full JSON scans
 - B. Typed sidecar indexes
 - C. Only browser sorting
 - D. By turning off filters
 
-**Correct answer: B — Typed sidecar indexes.** The source describes record_index_num/text/time sidecars.
+**Answer: B.** The source describes record_index_num/text/time sidecars.
 
 
 ---
@@ -552,7 +551,7 @@ Remember: meta schema is stable; flexible user-defined fields live in JSONB and 
 
 Follow the core system-design interview story: one authenticated record update becomes a durable transaction, a realtime frame and downstream event.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Authentication hook:** Request middleware verifying a session or API token.
 
@@ -620,7 +619,7 @@ Follow the core system-design interview story: one authenticated record update b
 
 **Backend use:** Responsive collaboration.
 
-### How it works, step by step
+### How the subsystem works
 
 1. 1. Browser sends PATCH/POST with session cookie or bearer token.
 2. 2. Auth hook applies MFA/device conditions; compileForUser computes access; assertCan checks action and field rules.
@@ -637,34 +636,34 @@ Learning trace: A user edits Ticket Status from Open to Resolved. The database u
 
 Remember this 6-step explanation; it is the most important TableOS system-design interview flow.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** What must be in the same transaction as a record update?
+**Question 1 — Basic:** What must be in the same transaction as a record update?
 
 - A. Only browser animations
 - B. Revision, base change and outbox event
 - C. External email delivery
 - D. Frontend cache
 
-**Correct answer: B — Revision, base change and outbox event.** The source's one-transaction design atomically stores mutation, revision, base_changes and outbox.
+**Answer: B.** The source's one-transaction design atomically stores mutation, revision, base_changes and outbox.
 
-**Question 2 (Medium):** Why publish realtime updates only after COMMIT?
+**Question 2 — Medium:** Why publish realtime updates only after COMMIT?
 
 - A. To make Redis persistent
 - B. To avoid announcing a change that might roll back
 - C. To bypass authorization
 - D. To simplify CSS
 
-**Correct answer: B — To avoid announcing a change that might roll back.** Clients should not observe a change that was not durably committed.
+**Answer: B.** Clients should not observe a change that was not durably committed.
 
-**Question 3 (Advanced):** What failure does the transactional outbox help prevent?
+**Question 3 — Advanced:** What failure does the transactional outbox help prevent?
 
 - A. Invalid CSS
 - B. Committed DB change with no downstream event publication
 - C. Browser tab closure
 - D. Missing JWT issuer
 
-**Correct answer: B — Committed DB change with no downstream event publication.** Persist the event with the business change; relay can publish later.
+**Answer: B.** Persist the event with the business change; relay can publish later.
 
 
 ---
@@ -675,7 +674,7 @@ Remember this 6-step explanation; it is the most important TableOS system-design
 
 Understand collaboration, synchronization after gaps and why WebSocket tickets are separate from normal API sessions.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **WebSocket:** Persistent bidirectional browser-server connection.
 
@@ -737,7 +736,7 @@ Understand collaboration, synchronization after gaps and why WebSocket tickets a
 
 **Backend use:** Scale realtime subscribers.
 
-### How it works, step by step
+### How the subsystem works
 
 1. 1. Authenticated client requests a short-lived WebSocket ticket.
 2. 2. Browser connects using tableos.v1 and subscribes to a base, optionally supplying last sequence.
@@ -754,34 +753,34 @@ Learning scenario: Editor A updates a cell while Editor B is viewing it. B recei
 
 Remember: WebSocket sends changes, sequence numbers preserve order, presence is ephemeral, and DB remains source of truth.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** What does a realtime client request before opening the TableOS WebSocket?
+**Question 1 — Basic:** What does a realtime client request before opening the TableOS WebSocket?
 
 - A. A public API key pasted in UI
 - B. A short-lived WS ticket
 - C. A new database migration
 - D. An S3 upload
 
-**Correct answer: B — A short-lived WS ticket.** The source states POST /v1/auth/ws-ticket precedes connection.
+**Answer: B.** The source states POST /v1/auth/ws-ticket precedes connection.
 
-**Question 2 (Medium):** What should a client do when the server sends resync_required?
+**Question 2 — Medium:** What should a client do when the server sends resync_required?
 
 - A. Ignore it
 - B. Refetch authoritative state
 - C. Delete its own record
 - D. Disable presence
 
-**Correct answer: B — Refetch authoritative state.** It signals a gap that cannot be safely replayed.
+**Answer: B.** It signals a gap that cannot be safely replayed.
 
-**Question 3 (Advanced):** Why does a browser ignore a frame with its own client mutation ID?
+**Question 3 — Advanced:** Why does a browser ignore a frame with its own client mutation ID?
 
 - A. To disable access checks
 - B. To avoid reapplying an optimistic local edit
 - C. To skip audit logging
 - D. To preserve offline files
 
-**Correct answer: B — To avoid reapplying an optimistic local edit.** The sender has already applied its optimistic change and can suppress duplicate presentation.
+**Answer: B.** The sender has already applied its optimistic change and can suppress duplicate presentation.
 
 
 ---
@@ -792,7 +791,7 @@ Remember: WebSocket sends changes, sequence numbers preserve order, presence is 
 
 Separate queued jobs, domain events, relay and scheduled jobs—four concepts interviewers often mix up.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **BullMQ queue:** Named Redis-backed work list consumed by workers.
 
@@ -854,7 +853,7 @@ Separate queued jobs, domain events, relay and scheduled jobs—four concepts in
 
 **Backend use:** Workflow orchestration.
 
-### How it works, step by step
+### How the subsystem works
 
 1. API transaction writes outbox_events; it does not synchronously execute every downstream effect.
 2. Relay polls roughly every 0.5 s and claims batches of 50 using database row locks.
@@ -871,34 +870,34 @@ Learning example: An uploaded CSV creates an import job. The HTTP request can re
 
 Remember: jobs are work requests; events describe things that happened; schedulers start work by time.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which library backs TableOS background queues?
+**Question 1 — Basic:** Which library backs TableOS background queues?
 
 - A. BullMQ on Redis
 - B. Only browser localStorage
 - C. React Router
 - D. Sharp
 
-**Correct answer: A — BullMQ on Redis.** The source lists BullMQ on Redis/Valkey for many job types.
+**Answer: A.** The source lists BullMQ on Redis/Valkey for many job types.
 
-**Question 2 (Medium):** Why use FOR UPDATE SKIP LOCKED when claiming outbox events?
+**Question 2 — Medium:** Why use FOR UPDATE SKIP LOCKED when claiming outbox events?
 
 - A. Allow several relays to claim distinct rows
 - B. Delete all events
 - C. Make SQL read-only
 - D. Generate signed URLs
 
-**Correct answer: A — Allow several relays to claim distinct rows.** Skip locked rows prevents concurrent claimers waiting on already claimed rows.
+**Answer: A.** Skip locked rows prevents concurrent claimers waiting on already claimed rows.
 
-**Question 3 (Advanced):** Two schedulers try to sync the same source. What mechanism is documented?
+**Question 3 — Advanced:** Two schedulers try to sync the same source. What mechanism is documented?
 
 - A. CSS selector
 - B. Database lock
 - C. Higher LLM temperature
 - D. Gallery view
 
-**Correct answer: B — Database lock.** A DB lock guards scheduler runs to avoid concurrent duplicate sync operations.
+**Answer: B.** A DB lock guards scheduler runs to avoid concurrent duplicate sync operations.
 
 
 ---
@@ -907,9 +906,9 @@ Remember: jobs are work requests; events describe things that happened; schedule
 
 **Source page:** 7
 
-Learn the field engine: typed validation, dependency tracking, calculated values and sensitive-data policies.
+Learn the field engine: typed validation, dependency tracking, calculated values and sensitive-data policies. The complete 31-field-type glossary is included below, reflecting the exact field-type family listed in the document.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Field type:** Kind of value and available operations.
 
@@ -989,7 +988,193 @@ Learn the field engine: typed validation, dependency tracking, calculated values
 
 **Backend use:** Controlled unmasking.
 
-### How it works, step by step
+**Text field:** Stores a short string value.
+
+**Example:** Lead name = Ali.
+
+**Backend use:** Names, labels and titles.
+
+**Long text field:** Stores longer multi-line text.
+
+**Example:** Issue description paragraph.
+
+**Backend use:** Notes and free-form text.
+
+**Checkbox field:** Stores a checked/unchecked choice.
+
+**Example:** Approved = true.
+
+**Backend use:** Binary states.
+
+**Single select field:** Stores one value from configured options.
+
+**Example:** Status = Open.
+
+**Backend use:** Consistent categorization.
+
+**Multiple select field:** Stores several selected options.
+
+**Example:** Tags = Urgent, VIP.
+
+**Backend use:** Multi-label classification.
+
+**User field:** References or identifies a team member.
+
+**Example:** Assigned to = Support Agent.
+
+**Backend use:** Responsibility and ownership.
+
+**Date field:** Stores a calendar date.
+
+**Example:** Due date = 2026-12-01.
+
+**Backend use:** Scheduling.
+
+**Date and time field:** Stores a point in time with time component.
+
+**Example:** Meeting = 15:30.
+
+**Backend use:** Timestamped workflow.
+
+**Phone field:** Stores a phone value subject to type rules and masking.
+
+**Example:** +92… contact number.
+
+**Backend use:** Communication and privacy controls.
+
+**Email field:** Stores an email value subject to type rules and masking.
+
+**Example:** support@example.com.
+
+**Backend use:** Contact and sensitive-data control.
+
+**URL field:** Stores a web address.
+
+**Example:** https://example.com.
+
+**Backend use:** External links.
+
+**Number field:** Stores a numeric value.
+
+**Example:** Quantity = 12.
+
+**Backend use:** Arithmetic, filtering and sorting.
+
+**Currency field:** Stores a money-formatted numeric amount.
+
+**Example:** Revenue = 12,500 PKR.
+
+**Backend use:** Financial data.
+
+**Percent field:** Stores/displays a percentage-type value.
+
+**Example:** Completion = 75%.
+
+**Backend use:** Progress and rates.
+
+**Duration field:** Stores a span of time.
+
+**Example:** Task duration = 90 minutes.
+
+**Backend use:** Time tracking.
+
+**Rating field:** Stores a bounded rating-like value.
+
+**Example:** Priority score = 4/5.
+
+**Backend use:** Scoring.
+
+**Attachment field:** Associates files with a record.
+
+**Example:** Contract PDF.
+
+**Backend use:** Document storage.
+
+**Link-to-record field:** Connects one record to records in another table.
+
+**Example:** Deal → Company.
+
+**Backend use:** Relationships.
+
+**Barcode field:** Holds a barcode-oriented identifier.
+
+**Example:** SKU barcode.
+
+**Backend use:** Inventory workflows.
+
+**Button field:** Represents a record-level action control.
+
+**Example:** Run automation.
+
+**Backend use:** Interactive actions.
+
+**JSON field:** Stores structured JSON content.
+
+**Example:** {source:'crm'}.
+
+**Backend use:** Nested integration metadata.
+
+**Formula field:** Evaluates an expression based on other values.
+
+**Example:** Quantity * Price.
+
+**Backend use:** Derived numeric/text values.
+
+**Lookup field:** Reads related-record values.
+
+**Example:** Company industry via link.
+
+**Backend use:** Cross-table display.
+
+**Rollup field:** Aggregates values from linked records.
+
+**Example:** SUM(invoice amounts).
+
+**Backend use:** Aggregated metrics.
+
+**Count field:** Counts related or matching records.
+
+**Example:** Number of linked tickets.
+
+**Backend use:** Relationship totals.
+
+**Autonumber field:** Assigns an automatically increasing record number.
+
+**Example:** Ticket #1205.
+
+**Backend use:** Human-friendly sequence.
+
+**TOS Record ID field:** Exposes a record's stable prefixed public identifier.
+
+**Example:** tos_…
+
+**Backend use:** Integrations and identity.
+
+**Created time field:** Displays when the record was created.
+
+**Example:** Created on 19 Nov.
+
+**Backend use:** Record metadata.
+
+**Modified time field:** Displays when the record last changed.
+
+**Example:** Edited at 14:20.
+
+**Backend use:** Change tracking.
+
+**Created by field:** Displays which user created a record.
+
+**Example:** Created by Alice.
+
+**Backend use:** Accountability.
+
+**Modified by field:** Displays which user last updated a record.
+
+**Example:** Updated by Bob.
+
+**Backend use:** Edit provenance.
+
+### How the subsystem works
 
 1. User creates a typed field; field package supplies codec, validation, filtering, sorting and conversions.
 2. When a formula is saved, parser/evaluator identifies dependencies.
@@ -1005,34 +1190,34 @@ Learning example: Line Item has Quantity 3, Unit Price 20; formula Total = Quant
 
 Remember: a field is not just a column label; it has a codec, permissions, filter semantics and compute rules.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** What enables efficient recomputation after one input field changes?
+**Question 1 — Basic:** What enables efficient recomputation after one input field changes?
 
 - A. Field dependencies
 - B. Delete every record
 - C. Public share links
 - D. WebSocket ticket
 
-**Correct answer: A — Field dependencies.** A dependency graph tells the system which calculated values depend on the input.
+**Answer: A.** A dependency graph tells the system which calculated values depend on the input.
 
-**Question 2 (Medium):** What makes NOW() and TODAY() different from ordinary formulas?
+**Question 2 — Medium:** What makes NOW() and TODAY() different from ordinary formulas?
 
 - A. They depend on time, so a scheduler refreshes them
 - B. They cannot be saved
 - C. They are API tokens
 - D. They are SQL migrations
 
-**Correct answer: A — They depend on time, so a scheduler refreshes them.** These formulas change without record edits.
+**Answer: A.** These formulas change without record edits.
 
-**Question 3 (Advanced):** How does the PDF describe revealing sensitive cells?
+**Question 3 — Advanced:** How does the PDF describe revealing sensitive cells?
 
 - A. Always visible to all editors
 - B. Allowlisted people reveal cells individually with logged reason
 - C. Only browser CSS masks them
 - D. Every external API bypasses audit
 
-**Correct answer: B — Allowlisted people reveal cells individually with logged reason.** Field-level controls require explicit reveal permissions and log the action.
+**Answer: B.** Field-level controls require explicit reveal permissions and log the action.
 
 
 ---
@@ -1043,7 +1228,7 @@ Remember: a field is not just a column label; it has a codec, permissions, filte
 
 Follow how a browser view becomes a database query and why the grid avoids fetching the full table.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Query compiler:** Logic translating view filters/sorts/search into SQL.
 
@@ -1099,7 +1284,7 @@ Follow how a browser view becomes a database query and why the grid avoids fetch
 
 **Backend use:** Locate records.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Browser requests a table/view with filters, sorts, groupings and needed field IDs.
 2. POST …/records/query compiles this into SQL over JSONB cells, typed sidecars and computed values.
@@ -1116,34 +1301,34 @@ Learning example: Sales Kanban filters Status = Open and orders by Due Date; que
 
 Remember: SQL handles filtering, cursor pages bound work, and realtime patches keep the grid current.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** What operation does the grid use to query records?
+**Question 1 — Basic:** What operation does the grid use to query records?
 
 - A. POST …/records/query
 - B. Only Redis GET
 - C. GCS upload
 - D. TOTP verification
 
-**Correct answer: A — POST …/records/query.** The documented API compiles filters, sorts and search into SQL.
+**Answer: A.** The documented API compiles filters, sorts and search into SQL.
 
-**Question 2 (Medium):** Why request only visible/needed fields?
+**Question 2 — Medium:** Why request only visible/needed fields?
 
 - A. To prevent user access entirely
 - B. Reduce response size and rendering cost
 - C. To disable computed columns
 - D. To force DDL
 
-**Correct answer: B — Reduce response size and rendering cost.** Field projection reduces payload for wide tables.
+**Answer: B.** Field projection reduces payload for wide tables.
 
-**Question 3 (Advanced):** What prevents full refetch after every collaborator edit?
+**Question 3 — Advanced:** What prevents full refetch after every collaborator edit?
 
 - A. Browser patches cached rows using realtime frames
 - B. Reload entire application
 - C. Delete grid state
 - D. Longer signed links
 
-**Correct answer: A — Browser patches cached rows using realtime frames.** The source describes realtime cache patching, not full refetch on every edit.
+**Answer: A.** The source describes realtime cache patching, not full refetch on every edit.
 
 
 ---
@@ -1154,7 +1339,7 @@ Remember: SQL handles filtering, cursor pages bound work, and realtime patches k
 
 Understand the private-bucket lifecycle from upload to authorized browser access.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Attachment:** File associated with a TableOS record.
 
@@ -1210,7 +1395,7 @@ Understand the private-bucket lifecycle from upload to authorized browser access
 
 **Backend use:** Efficient data transfer.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Client uploads through TableOS API; the system stores the object in private GCS.
 2. The object key includes workspace/base/attachment/filename organization.
@@ -1227,34 +1412,34 @@ Source note: On 19 Nov 2026, the former shared bucket's 319,341 objects were cop
 
 Remember: authorization at the API and cryptographic time-limited storage access are two separate controls.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Are TableOS attachment files publicly readable without checks?
+**Question 1 — Basic:** Are TableOS attachment files publicly readable without checks?
 
 - A. Yes, all are public
 - B. No, access is checked before a short signed URL
 - C. Only through Slack
 - D. Only if in JSONB
 
-**Correct answer: B — No, access is checked before a short signed URL.** Objects are private; the API checks access and provides temporary signed links.
+**Answer: B.** Objects are private; the API checks access and provides temporary signed links.
 
-**Question 2 (Medium):** Why are signed URLs short-lived?
+**Question 2 — Medium:** Why are signed URLs short-lived?
 
 - A. So files become unencrypted
 - B. To limit reuse after an authorized access decision
 - C. Because URLs cannot contain filenames
 - D. To make uploads slower
 
-**Correct answer: B — To limit reuse after an authorized access decision.** The expiry limits the duration of delegated access.
+**Answer: B.** The expiry limits the duration of delegated access.
 
-**Question 3 (Advanced):** Can an attacker alter the object key inside an existing signed URL and keep it valid?
+**Question 3 — Advanced:** Can an attacker alter the object key inside an existing signed URL and keep it valid?
 
 - A. Yes, signatures don't cover objects
 - B. No, the provider validates the signature against the signed request
 - C. Only for thumbnails
 - D. Only after refresh
 
-**Correct answer: B — No, the provider validates the signature against the signed request.** Changing protected URL parameters invalidates its signature.
+**Answer: B.** Changing protected URL parameters invalidates its signature.
 
 
 ---
@@ -1265,7 +1450,7 @@ Remember: authorization at the API and cryptographic time-limited storage access
 
 Distinguish a copied synced table from ordinary-table HubSpot field mapping and understand conflict resolution.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Integration connection:** Stored credential/config for an external provider.
 
@@ -1345,7 +1530,7 @@ Distinguish a copied synced table from ordinary-table HubSpot field mapping and 
 
 **Backend use:** Efficient mapping UI.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Owner configures encrypted organization-shared connection.
 2. Synced table pulls another TableOS base, Airtable table, HubSpot object or Gmail inbox; it normally presents read-only copied data.
@@ -1362,34 +1547,34 @@ Learning example: Map local Deals.Amount ↔ HubSpot Deals.amount. TableOS becom
 
 Remember: shared connection → select source → pair records → compare changed fields → apply direction → update/checkpoint.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Who manages organization-shared integration connections in the PDF?
+**Question 1 — Basic:** Who manages organization-shared integration connections in the PDF?
 
 - A. Only Owners
 - B. Every guest
 - C. Only workers
 - D. Anonymous visitors
 
-**Correct answer: A — Only Owners.** Connections are owner-managed and stored encrypted.
+**Answer: A.** Connections are owner-managed and stored encrypted.
 
-**Question 2 (Medium):** What distinguishes a synced table from HubSpot field mapping?
+**Question 2 — Medium:** What distinguishes a synced table from HubSpot field mapping?
 
 - A. They are always identical
 - B. Synced table copies a source into a read-only table; mapping syncs selected fields on an ordinary table
 - C. Mapping uses no credentials
 - D. Synced tables only store images
 
-**Correct answer: B — Synced table copies a source into a read-only table; mapping syncs selected fields on an ordinary table.** These are distinct integration features and workflows.
+**Answer: B.** These are distinct integration features and workflows.
 
-**Question 3 (Advanced):** What happens if both sides changed the same two-way mapped field?
+**Question 3 — Advanced:** What happens if both sides changed the same two-way mapped field?
 
 - A. Delete both values
 - B. Newer change wins under documented rule
 - C. User must always choose manually
 - D. Disable all records
 
-**Correct answer: B — Newer change wins under documented rule.** The document says newer change wins after tracking last values on each side.
+**Answer: B.** The document says newer change wins after tracking last values on each side.
 
 
 ---
@@ -1400,7 +1585,7 @@ Remember: shared connection → select source → pair records → compare chang
 
 Learn how automation triggers and steps execute durably, and why public experiences have limited tokens.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Automation trigger:** Condition starting a workflow.
 
@@ -1462,7 +1647,7 @@ Learn how automation triggers and steps execute durably, and why public experien
 
 **Backend use:** External orchestration.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Create automation trigger (record created/updated/matches, form, schedule, webhook or button).
 2. Configure ordered actions (create/update records, email, Slack, webhook, script).
@@ -1479,34 +1664,34 @@ Learning example: Ticket created → automation triggers → worker creates run 
 
 Remember: trigger → durable run → queued steps → owner-scoped execution → idempotent completion.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which can trigger a TableOS automation?
+**Question 1 — Basic:** Which can trigger a TableOS automation?
 
 - A. Record update
 - B. Only GCS deletion
 - C. Only database migration
 - D. Only an admin's browser refresh
 
-**Correct answer: A — Record update.** The PDF lists record changes, form submissions, schedules, webhooks and buttons.
+**Answer: A.** The PDF lists record changes, form submissions, schedules, webhooks and buttons.
 
-**Question 2 (Medium):** Why store automation run and step state in PostgreSQL?
+**Question 2 — Medium:** Why store automation run and step state in PostgreSQL?
 
 - A. To improve CSS
 - B. To make execution durable and inspectable
 - C. To replace authentication
 - D. To store audio
 
-**Correct answer: B — To make execution durable and inspectable.** Persisted states survive worker interruptions and support retries.
+**Answer: B.** Persisted states survive worker interruptions and support retries.
 
-**Question 3 (Advanced):** An automation updates the same field that triggers itself repeatedly. What guards against runaway execution?
+**Question 3 — Advanced:** An automation updates the same field that triggers itself repeatedly. What guards against runaway execution?
 
 - A. Loop guard
 - B. CORS
 - C. Signed URL
 - D. Sidecar index
 
-**Correct answer: A — Loop guard.** Loop guards are explicitly documented for automation safety.
+**Answer: A.** Loop guards are explicitly documented for automation safety.
 
 
 ---
@@ -1517,7 +1702,7 @@ Remember: trigger → durable run → queued steps → owner-scoped execution �
 
 Understand layered authentication and authorization without confusing organization account type, base role and field visibility.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Account type:** Organization-wide level: Owner, Admin or Member.
 
@@ -1597,7 +1782,7 @@ Understand layered authentication and authorization without confusing organizati
 
 **Backend use:** Accountability.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Request authenticates using browser session or bearer API token.
 2. MFA, forced password change and approved device policy are enforced at authentication boundary.
@@ -1614,34 +1799,34 @@ Example (illustrative): a Member has Editor role in the Support base but No acce
 
 Remember: identity → organization account type → workspace/base role → specific action → field-level rules.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Who can manage organization connectors according to the PDF?
+**Question 1 — Basic:** Who can manage organization connectors according to the PDF?
 
 - A. Owner
 - B. Admin and Member automatically
 - C. Any base commenter
 - D. Unauthenticated users
 
-**Correct answer: A — Owner.** Owner alone manages connections and connector settings.
+**Answer: A.** Owner alone manages connections and connector settings.
 
-**Question 2 (Medium):** Does having organization Admin status automatically grant access to every base?
+**Question 2 — Medium:** Does having organization Admin status automatically grant access to every base?
 
 - A. Yes
 - B. No, Admin opens only bases it has been granted
 - C. Only via WebSocket
 - D. Only with a signed URL
 
-**Correct answer: B — No, Admin opens only bases it has been granted.** The table says Owners have all; Admins and Members have 'given' base access.
+**Answer: B.** The table says Owners have all; Admins and Members have 'given' base access.
 
-**Question 3 (Advanced):** What happens to an owner's master token after its creator is no longer an Owner?
+**Question 3 — Advanced:** What happens to an owner's master token after its creator is no longer an Owner?
 
 - A. It remains universally valid
 - B. It stops working
 - C. It becomes a public share link
 - D. It changes to a TOTP code
 
-**Correct answer: B — It stops working.** The source explicitly states master token rights depend on the creator retaining Owner status.
+**Answer: B.** The source explicitly states master token rights depend on the creator retaining Owner status.
 
 
 ---
@@ -1652,7 +1837,7 @@ Remember: identity → organization account type → workspace/base role → spe
 
 Distinguish ordinary record history from recoverable deletion and organization-wide security audit.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Record revision:** Persisted record-change version.
 
@@ -1702,7 +1887,7 @@ Distinguish ordinary record history from recoverable deletion and organization-w
 
 **Backend use:** Collaboration context.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Each record edit writes a record_revisions entry.
 2. Users can view record activity and use per-base undo/redo, including after page reload.
@@ -1718,34 +1903,34 @@ Learning scenario: An editor deletes a customer record, then restores it from Tr
 
 Remember: revisions = data history; deletion batches = trash; audit_events = security activity.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which table records ordinary record revisions?
+**Question 1 — Basic:** Which table records ordinary record revisions?
 
 - A. record_revisions
 - B. audit_events only
 - C. core.sessions
 - D. table_sync_pushes
 
-**Correct answer: A — record_revisions.** Record history lives in data.record_revisions.
+**Answer: A.** Record history lives in data.record_revisions.
 
-**Question 2 (Medium):** Where are deleted records tracked for restoration?
+**Question 2 — Medium:** Where are deleted records tracked for restoration?
 
 - A. deletion_batches
 - B. Redis locks only
 - C. Frontend CSS
 - D. GCS signature
 
-**Correct answer: A — deletion_batches.** Deletion batches represent recoverable trash.
+**Answer: A.** Deletion batches represent recoverable trash.
 
-**Question 3 (Advanced):** How do record history and security audit differ?
+**Question 3 — Advanced:** How do record history and security audit differ?
 
 - A. They are identical
 - B. Revisions describe record edits; audit_events describe security-relevant actions
 - C. Audit is only in browser
 - D. History never persists
 
-**Correct answer: B — Revisions describe record edits; audit_events describe security-relevant actions.** They serve separate accountability needs.
+**Answer: B.** They serve separate accountability needs.
 
 
 ---
@@ -1756,7 +1941,7 @@ Remember: revisions = data history; deletion batches = trash; audit_events = sec
 
 Know how TableOS is tested, released, deployed and monitored, and distinguish deployed limits from planned scaling.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **Release branch:** Branch holding a prepared version release.
 
@@ -1824,7 +2009,7 @@ Know how TableOS is tested, released, deployed and monitored, and distinguish de
 
 **Backend use:** Production governance.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Develop changes on a feature branch and test locally with dummy data.
 2. Run type checks, server build, regression scripts and Playwright UI check with screenshots.
@@ -1841,34 +2026,34 @@ As built limits (19 Nov 2026): one PostgreSQL and one Redis/Valkey instance for 
 
 Remember: describe the actual deployment, release branch policy and known limits—never present the target architecture as deployed.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which branch does the PDF say Render deploys for TableOS?
+**Question 1 — Basic:** Which branch does the PDF say Render deploys for TableOS?
 
 - A. master
 - B. Any arbitrary developer branch
 - C. Only gh-pages
 - D. The original architecture folder
 
-**Correct answer: A — master.** It describes approved releases merged into master, which Render deploys. Note: this is TableOS, not the Learning Studio repo.
+**Answer: A.** It describes approved releases merged into master, which Render deploys. Note: this is TableOS, not the Learning Studio repo.
 
-**Question 2 (Medium):** What quality checks precede a TableOS release?
+**Question 2 — Medium:** What quality checks precede a TableOS release?
 
 - A. Type checks, server build, regression scripts and Playwright
 - B. Only unit test count
 - C. No tests ever
 - D. Only database dump
 
-**Correct answer: A — Type checks, server build, regression scripts and Playwright.** The documented release workflow explicitly lists those checks.
+**Answer: A.** The documented release workflow explicitly lists those checks.
 
-**Question 3 (Advanced):** Which scalability feature is a target design rather than deployed?
+**Question 3 — Advanced:** Which scalability feature is a target design rather than deployed?
 
 - A. Single shared Postgres
 - B. Sharded data plane with Kafka-style log
 - C. BullMQ worker queues
 - D. Private object storage
 
-**Correct answer: B — Sharded data plane with Kafka-style log.** The PDF says the sharded/Kafka-style original design is not built.
+**Answer: B.** The PDF says the sharded/Kafka-style original design is not built.
 
 
 ---
@@ -1879,7 +2064,7 @@ Remember: describe the actual deployment, release branch policy and known limits
 
 Turn the whole design into one interview-ready explanation; the PDF names references you can open in the real TableOS source repository.
 
-### All definitions and backend applications
+### Definitions, examples, backend use
 
 **As-built design:** Documentation of the currently implemented/deployed system at a dated snapshot.
 
@@ -1935,7 +2120,7 @@ Turn the whole design into one interview-ready explanation; the PDF names refere
 
 **Backend use:** Resilience planning.
 
-### How it works, step by step
+### How the subsystem works
 
 1. Start explanation at organization → workspace → base → table → record.
 2. Name API, realtime, worker and relay around PostgreSQL/Redis and private GCS.
@@ -1952,42 +2137,38 @@ Interview script: 'TableOS is a multi-tenant relational workspace product with f
 
 Remember: always distinguish PDF source facts from learning examples, and current implementation from target architecture.
 
-### Interview practice and answer key
+### Interview practice (with answer explanations)
 
-**Question 1 (Basic):** Which document describes what TableOS actually ran on 19 Nov 2026?
+**Question 1 — Basic:** Which document describes what TableOS actually ran on 19 Nov 2026?
 
 - A. System Design — as built v0.36.0
 - B. Only the original ADRs
 - C. Only UI CSS
 - D. Only the future sharded design
 
-**Correct answer: A — System Design — as built v0.36.0.** The uploaded PDF is explicitly the current-state companion to the earlier architecture target.
+**Answer: A.** The uploaded PDF is explicitly the current-state companion to the earlier architecture target.
 
-**Question 2 (Medium):** Where should an engineer inspect why architecture decisions were chosen?
+**Question 2 — Medium:** Where should an engineer inspect why architecture decisions were chosen?
 
 - A. architecture/ ADRs
 - B. Only public share links
 - C. A table view color
 - D. GCS thumbnails
 
-**Correct answer: A — architecture/ ADRs.** ADRs capture design rationale; work log and change log explain implementation.
+**Answer: A.** ADRs capture design rationale; work log and change log explain implementation.
 
-**Question 3 (Advanced):** What is the strongest concise TableOS system-design explanation?
+**Question 3 — Advanced:** What is the strongest concise TableOS system-design explanation?
 
 - A. It's only a React spreadsheet
 - B. It uses flexible record storage, atomic changes/outbox, realtime gateway, jobs, permissions and private file storage
 - C. It already uses Kafka shards in production
 - D. It has no permissions
 
-**Correct answer: B — It uses flexible record storage, atomic changes/outbox, realtime gateway, jobs, permissions and private file storage.** This answer connects the major as-built subsystems and avoids conflating them with target architecture.
+**Answer: B.** This answer connects the major as-built subsystems and avoids conflating them with target architecture.
 
 
 ---
 
-## Source and caveats
+## Provenance and limits
 
-- Source is the user's supplied PDF, *TableOS — System Design (as built), v0.36.0, 19 November 2026*.
-- The source documents the deployed system **at that time**, not current live operational verification.
-- The original target architecture (under `architecture/`) is distinct from the as-built deployment; never present sharding or Kafka-style logging as deployed based on this PDF.
-- Reference files named by the PDF: `docs/SYSTEM-DESIGN.md`, `CHANGELOG.md`, `docs/TABLEOS-WORK-LOG.md`, `docs/VERSIONING.md`, and in-app Help → API reference. This learning repository does **not** assert that those original TableOS repository files are included here.
-- This is an educational rewrite, not an API contract or production operations runbook. No credentials are included.
+The source is the user's *TableOS — System Design (as built), v0.36.0, 19 November 2026*. It describes the deployed system at that time. Its original sharded data plane and Kafka-style logging were *target architecture*, not described as deployed. Original referenced sources include `docs/SYSTEM-DESIGN.md`, `docs/TABLEOS-WORK-LOG.md`, `CHANGELOG.md`, `docs/VERSIONING.md`, `architecture/` and Help → API reference. These files are referenced, not claimed as present in this learning repository. Examples are illustrative and no access credentials are provided.
