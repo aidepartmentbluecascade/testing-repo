@@ -297,8 +297,10 @@ class PortalHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(body)
-        elif path in {"/day1", "/day1.html", "/day2", "/day2.html", "/day3", "/day3.html", "/tableos", "/tableos.html", "/ai-backend", "/ai-backend-study.html"}:
-            day = "ai-backend-study" if path.startswith("/ai-backend") else path.split("/")[1].split(".")[0]
+        elif path in {"/day1", "/day1.html", "/day2", "/day2.html", "/day3", "/day3.html", "/tableos", "/tableos.html", "/ai-backend", "/ai-backend-study.html", "/tableos-architecture", "/tableos-architecture.html"}:
+            day = ("ai-backend-study" if path.startswith("/ai-backend")
+                   else "tableos-architecture" if path.startswith("/tableos-architecture")
+                   else path.split("/")[1].split(".")[0])
             body = (ROOT / (day + ".html")).read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
