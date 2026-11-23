@@ -2,6 +2,8 @@
 
 **Source:** TableOS — System Design (as built), **v0.36.0**, dated **19 November 2026**. This guide reorganizes the user's nine-page PDF into 16 study modules. As-built facts refer to the dated snapshot. All practical scenarios and examples are learning illustrations unless specifically stated otherwise.
 
+**Animated learning lab:** [Follow TableOS request flows](/tableos-architecture) — record editing, private attachments and HubSpot field sync with 21 guided steps, concept explanations and quizzes.
+
 **Interactive study hub:** https://arslan-learning-studio.onrender.com/tableos
 
 **Coverage:** 16 source sections, 205 individual terms including all 31 documented field types, 48 explained interview questions.
