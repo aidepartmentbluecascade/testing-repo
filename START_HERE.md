@@ -10,6 +10,7 @@ The homepage provides direct access to three day-based learning dashboards and a
 - **[Day 2 — Backend Engineering & Databases](/day2):** Python, Node.js, APIs, PostgreSQL, Redis, security, architecture and queues. [Detailed reference guide](docs/interview-preparation/day-2/README.md).
 - **[Day 3 — MLOps, Cloud, Voice AI & Mock Interview](/day3):** ML frameworks, deployment, CI/CD, voice AI, frontend, integrations, system design and mock interviews.
 - **[TableOS — System Design Study Hub](/tableos):** A separate interactive section immediately after Day 3, based on the uploaded v0.36.0 as-built PDF. Covers all 16 source sections with 205 definitions, working flows, illustrative examples and 48 interview questions. [Complete written study guide](docs/interview-preparation/tableos/README.md).
+- **[TableOS Architecture Animation Lab](/tableos-architecture):** Follow three animated user workflows (record edit, attachment access and HubSpot mapping) through the UI, API, database, realtime, relay and workers. Includes 21 teaching steps with interactive knowledge checks, payload examples, clickable component explanations and self-review notes.
 - **[AI + Backend Interview Study Studio](/ai-backend):** Added from the uploaded standalone HTML. Includes 45 interview concepts across backend, security, operations, AI/RAG, agents, and evaluation; interactive definitions and examples, flashcards, quizzes, mock interviews, architecture lab, and local progress tracking.
 
 ## Updating from the previous portal
